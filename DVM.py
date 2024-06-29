@@ -28,6 +28,8 @@ def initialize_state():
         st.session_state.final_decision = None
     if 'final_explanation' not in st.session_state:
         st.session_state.final_explanation = None
+    if 'decisions' not in st.session_state:
+        st.session_state.decisions = []
 
 def main():
     st.set_page_config(page_title="Détermination DLC ou DDM", layout="wide")
@@ -248,12 +250,12 @@ def main():
             st.success(f"Décision : {st.session_state.final_decision}")
             st.write(f"Explication : {st.session_state.final_explanation}")
             display_dgal_info(st.session_state.current_step)
-            decisions.append({"Question": "Décision finale", "Réponse": "N/A", "Décision": st.session_state.final_decision})
+            st.session_state.decisions.append({"Question": "Décision finale", "Réponse": "N/A", "Décision": st.session_state.final_decision})
         else:
             st.error("Erreur dans l'arbre de décision.")
 
     if st.button("Sauvegarder les décisions", key="save_button"):
-        save_decision(decisions)
+        save_decision(st.session_state.decisions)
         st.success("Décisions sauvegardées avec succès")
 
 if __name__ == "__main__":
