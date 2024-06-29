@@ -220,10 +220,8 @@ def main():
                 key = "q9"
 
             answer = display_question(question, ["Oui", "Non"], key)
-            if answer in current_node:
-                current_node = current_node[answer]
-            else:
-                st.error("Erreur dans l'arbre de décision.")
+            current_node = next_step(current_node, answer)
+            if current_node is None:
                 break
             decision_path.append((question, answer))
             justification = st.text_area(f"Justifiez votre réponse ({key})", key=f"justification_{key}")
