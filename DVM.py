@@ -63,9 +63,12 @@ def main():
     )
 
     decisions = []
-    current_step = st.session_state.get('current_step', 1)
-    final_decision = st.session_state.get('final_decision', None)
-    final_explanation = st.session_state.get('final_explanation', None)
+    if 'current_step' not in st.session_state:
+        st.session_state.current_step = 1
+    if 'final_decision' not in st.session_state:
+        st.session_state.final_decision = None
+    if 'final_explanation' not in st.session_state:
+        st.session_state.final_explanation = None
 
     tree = {
         "Q1": {
@@ -151,84 +154,113 @@ def main():
     }
 
     current_node = tree
-    decision_path = st.session_state.get('decision_path', [])
-    justifications = st.session_state.get('justifications', {})
-    uploaded_files = st.session_state.get('uploaded_files', {})
+    if 'decision_path' not in st.session_state:
+        st.session_state.decision_path = []
+    if 'justifications' not in st.session_state:
+        st.session_state.justifications = {}
+    if 'uploaded_files' not in st.session_state:
+        st.session_state.uploaded_files = {}
 
-    if current_step == 1:
+    decision_path = st.session_state.decision_path
+
+    if st.session_state.current_step == 1:
         q1 = display_question("Q1 : Le produit alimentaire est-il exempt de la DLC conformément au règlement (UE) n° 1169/2011 ou est-il couvert par d'autres dispositions de l'Union imposant d'autres types de marquage de la date ?", ["Oui", "Non"], "q1")
         decision_path.append(("Q1", q1))
-        current_node = current_node[q1]
-        st.session_state.current_step = current_step + 1
+        if q1 in current_node["Q1"]:
+            current_node = current_node["Q1"][q1]
+            st.session_state.current_step += 1
+        else:
+            st.error("Option invalide sélectionnée pour Q1.")
 
-    if current_step == 2:
+    if st.session_state.current_step == 2:
         q2 = display_question("Q2 : Le produit alimentaire est-il congelé ?", ["Oui", "Non"], "q2")
         decision_path.append(("Q2", q2))
-        current_node = current_node[q2]
-        st.session_state.current_step = current_step + 1
+        if q2 in current_node:
+            current_node = current_node[q2]
+            st.session_state.current_step += 1
+        else:
+            st.error("Option invalide sélectionnée pour Q2.")
 
-    if current_step == 3:
+    if st.session_state.current_step == 3:
         q3 = display_question("Q3 : Le produit alimentaire subit-il un traitement assainissant validé éliminant toutes les spores des bactéries pathogènes ?", ["Oui", "Non"], "q3")
         decision_path.append(("Q3", q3))
-        current_node = current_node[q3]
-        if q3 == "Oui":
-            st.session_state.current_step = current_step + 1
+        if q3 in current_node:
+            current_node = current_node[q3]
+            if q3 == "Oui":
+                st.session_state.current_step += 1
+            else:
+                st.session_state.final_decision = current_node['Décision']
+                st.session_state.final_explanation = current_node['Explication']
+                st.session_state.current_step = 11
         else:
-            st.session_state.final_decision = current_node['Décision']
-            st.session_state.final_explanation = current_node['Explication']
-            st.session_state.current_step = 11
+            st.error("Option invalide sélectionnée pour Q3.")
 
-    if current_step == 4:
+    if st.session_state.current_step == 4:
         q4 = display_question("Q4 : Le produit alimentaire est-il soumis à un traitement assainissant validé éliminant toutes les cellules végétatives des bactéries pathogènes d'origine alimentaire ?", ["Oui", "Non"], "q4")
         decision_path.append(("Q4", q4))
-        current_node = current_node[q4]
-        if q4 == "Oui":
-            st.session_state.current_step = current_step + 1
+        if q4 in current_node:
+            current_node = current_node[q4]
+            if q4 == "Oui":
+                st.session_state.current_step += 1
+            else:
+                st.session_state.current_step += 2
         else:
-            st.session_state.current_step = current_step + 2
+            st.error("Option invalide sélectionnée pour Q4.")
 
-    if current_step == 5:
+    if st.session_state.current_step == 5:
         q5a = display_question("Q5a : Existe-t-il un risque de recontamination du produit alimentaire avant l'emballage ?", ["Oui", "Non"], "q5a")
         decision_path.append(("Q5a", q5a))
-        current_node = current_node[q5a]
-        if q5a == "Oui":
-            st.session_state.current_step = current_step + 1
+        if q5a in current_node:
+            current_node = current_node[q5a]
+            if q5a == "Oui":
+                st.session_state.current_step += 1
+            else:
+                st.session_state.final_decision = current_node['Décision']
+                st.session_state.final_explanation = current_node['Explication']
+                st.session_state.current_step = 11
         else:
-            st.session_state.final_decision = current_node['Décision']
-            st.session_state.final_explanation = current_node['Explication']
-            st.session_state.current_step = 11
+            st.error("Option invalide sélectionnée pour Q5a.")
 
-    if current_step == 6:
+    if st.session_state.current_step == 6:
         q5b = display_question("Q5b : Y a-t-il un risque de recontamination du produit alimentaire avant son emballage ?", ["Oui", "Non"], "q5b")
         decision_path.append(("Q5b", q5b))
-        current_node = current_node[q5b]
-        if q5b == "Oui":
-            st.session_state.current_step = current_step + 1
+        if q5b in current_node:
+            current_node = current_node[q5b]
+            if q5b == "Oui":
+                st.session_state.current_step += 1
+            else:
+                st.session_state.final_decision = current_node['Décision']
+                st.session_state.final_explanation = current_node['Explication']
+                st.session_state.current_step = 11
         else:
-            st.session_state.final_decision = current_node['Décision']
-            st.session_state.final_explanation = current_node['Explication']
-            st.session_state.current_step = 11
+            st.error("Option invalide sélectionnée pour Q5b.")
 
-    if current_step == 7:
+    if st.session_state.current_step == 7:
         q6 = display_question("Q6 : Le produit alimentaire subit-il un second traitement assainissant validé éliminant toutes les cellules végétatives des bactéries pathogènes d'origine ?", ["Oui", "Non"], "q6")
         decision_path.append(("Q6", q6))
-        current_node = current_node[q6]
-        st.session_state.final_decision = current_node['Décision']
-        st.session_state.final_explanation = current_node['Explication']
-        st.session_state.current_step = 11
-
-    if current_step == 8:
-        q7 = display_question("Q7 : Le traitement assainissant est-il appliqué à des produits emballés ou suivi d'un emballage aseptique ?", ["Oui", "Non"], "q7")
-        decision_path.append(("Q7", q7))
-        current_node = current_node[q7]
-        if q7 == "Oui":
+        if q6 in current_node:
+            current_node = current_node[q6]
             st.session_state.final_decision = current_node['Décision']
             st.session_state.final_explanation = current_node['Explication']
             st.session_state.current_step = 11
         else:
-            st.session_state.current_step = current_step + 1
+            st.error("Option invalide sélectionnée pour Q6.")
 
-    if current_step == 9:
+    if st.session_state.current_step == 8:
+        q7 = display_question("Q7 : Le traitement assainissant est-il appliqué à des produits emballés ou suivi d'un emballage aseptique ?", ["Oui", "Non"], "q7")
+        decision_path.append(("Q7", q7))
+        if q7 in current_node:
+            current_node = current_node[q7]
+            if q7 == "Oui":
+                st.session_state.final_decision = current_node['Décision']
+                st.session_state.final_explanation = current_node['Explication']
+                st.session_state.current_step = 11
+            else:
+                st.session_state.current_step += 1
+        else:
+            st.error("Option invalide sélectionnée pour Q7.")
+
+    if st.session_state.current_step == 9:
         st.markdown("""
         ## **Q8 : Le produit alimentaire favorise-t-il la croissance des bactéries ?**
         """)
@@ -245,9 +277,9 @@ def main():
             st.session_state.final_explanation = current_node['Q8']['Explication']
             st.session_state.current_step = 11
         else:
-            st.session_state.current_step = current_step + 1
+            st.session_state.current_step += 1
 
-    if current_step == 10:
+    if st.session_state.current_step == 10:
         st.markdown("""
         ## **Q9 : Le produit alimentaire favorise-t-il la germination, la croissance et la production de toxines ?**
         """)
@@ -267,12 +299,12 @@ def main():
             st.session_state.final_explanation = current_node['Q9']['Explication']
             st.session_state.current_step = 11
 
-    if current_step == 11:
-        if final_decision:
-            st.success(f"Décision : {final_decision}")
-            st.write(f"Explication : {final_explanation}")
-            display_dgal_info(current_step)
-            decisions.append({"Question": "Décision finale", "Réponse": "N/A", "Décision": final_decision})
+    if st.session_state.current_step == 11:
+        if st.session_state.final_decision:
+            st.success(f"Décision : {st.session_state.final_decision}")
+            st.write(f"Explication : {st.session_state.final_explanation}")
+            display_dgal_info(st.session_state.current_step)
+            decisions.append({"Question": "Décision finale", "Réponse": "N/A", "Décision": st.session_state.final_decision})
         else:
             st.error("Erreur dans l'arbre de décision.")
 
