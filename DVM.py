@@ -1,4 +1,170 @@
-    # ... (code précédent)
+ import streamlit as st
+import pandas as pd
+import os
+from PIL import Image
+
+# Fonction pour sauvegarder les décisions
+def save_decision(data):
+    df = pd.DataFrame(data)
+    df.to_csv('decisions.csv', mode='a', index=False, header=False)
+
+def main():
+    st.set_page_config(page_title="Détermination DLC ou DDM", layout="wide")
+    st.title("Détermination DLC ou DDM")
+    st.markdown(
+        """
+        <style>
+        .stApp {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.5;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+
+        .stTitle {
+            color: #007bff;
+            font-size: 2.5em;
+            margin-bottom: 1em;
+            text-align: center;
+        }
+
+        .stButton {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 1em;
+        }
+
+        .stButton:hover {
+            background-color: #0056b3;
+        }
+
+        .stFileUpload {
+            margin-bottom: 1em;
+        }
+
+        .stRadio {
+            margin-bottom: 0.5em;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    decisions = []
+    current_step = 1
+    final_decision = None  # Initialisation de la variable de décision finale
+    final_explanation = None  # Initialisation de la variable d'explication finale
+
+    # Fonction pour afficher les informations détaillées de la note DGAL après chaque réponse
+    def display_dgal_info(step):
+        st.markdown(f"""
+        **Informations de la note DGAL pour l'étape {step}** :
+        - **Règlement (UE) n° 1169/2011** : concerne l'information des consommateurs sur les denrées alimentaires.
+        - **Critères microbiologiques** : basés sur le règlement (CE) n° 2073/2005 concernant les critères microbiologiques applicables aux denrées alimentaires.
+        - **Études de vieillissement** : recommandées pour valider la durée de vie microbiologique des produits.
+        """)
+
+    # Arbre de décision
+    tree = {
+        "Q1": {
+            "Oui": {
+                "Décision": "Étiquetage selon réglementation en vigueur",
+                "Explication": "Le produit est exempt de la DLC et suit la réglementation en vigueur.",
+            },
+            "Non": {
+                "Q2": {
+                    "Oui": {
+                        "Q3": {
+                            "Oui": {
+                                "Q5a": {
+                                    "Oui": {
+                                        "Q6": {
+                                            "Oui": {
+                                                "Décision": "DDM",
+                                                "Explication": "Le produit subit un double traitement assainissant et ne risque pas de recontamination.",
+                                            },
+                                            "Non": {
+                                                "Décision": "DLC",
+                                                "Explication": "Le produit subit un double traitement, mais il y a un risque de recontamination.",
+                                            }
+                                        }
+                                    },
+                                    "Non": {
+                                        "Décision": "DDM",
+                                        "Explication": "Le produit subit un traitement assainissant et ne risque pas de recontamination.",
+                                    }
+                                }
+                            },
+                            "Non": {
+                                "Décision": "DLC",
+                                "Explication": "Le produit ne subit pas un traitement assainissant éliminant toutes les spores.",
+                            }
+                        }
+                    },
+                    "Non": {
+                        "Q4": {
+                            "Oui": {
+                                "Q5b": {
+                                    "Oui": {
+                                        "Q6": {
+                                            "Oui": {
+                                                "Décision": "DDM",
+                                                "Explication": "Le produit subit un double traitement assainissant et ne risque pas de recontamination.",
+                                            },
+                                            "Non": {
+                                                "Décision": "DLC",
+                                                "Explication": "Le produit subit un double traitement, mais il y a un risque de recontamination.",
+                                            }
+                                        }
+                                    },
+                                    "Non": {
+                                        "Décision": "DDM",
+                                        "Explication": "Le produit subit un traitement assainissant et ne risque pas de recontamination.",
+                                    }
+                                }
+                            },
+                            "Non": {
+                                "Q7": {
+                                    "Oui": {
+                                        "Décision": "DDM",
+                                        "Explication": "Le traitement assainissant est appliqué à des produits emballés ou suivi d'un emballage aseptique.",
+                                    },
+                                    "Non": {
+                                        "Q8": {
+                                            # Ajouter les conditions pour aw et pH
+                                            "Décision": "DDM",
+                                            "Explication": "Le produit ne favorise pas la croissance des bactéries.",
+                                        },
+                                        "Q9": {
+                                            # Ajouter les conditions pour aw2 et pH2
+                                            "Décision": "DDM",
+                                            "Explication": "Le produit ne favorise pas la germination, la croissance et la production de toxines.",
+                                        },
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    # Navigation dans l'arbre de décision
+    current_node = tree
+    decision_path = []  # Liste pour stocker le chemin de décision
+    justifications = {}  # Dictionnaire pour stocker les justifications
+    uploaded_files = {}  # Dictionnaire pour stocker les fichiers téléchargés
+
+    # Fonction pour afficher les questions et les réponses
+    def display_question(question, options, key):
+        st.markdown(f"## **{question}**")
+        answer = st.radio("", options, key=key)
+        return answer
 
     # Question 1
     if current_step == 1:
@@ -7,7 +173,84 @@
         current_node = current_node[q1]
         current_step += 1
 
-    # ... (code pour les autres questions)
+    # Question 2
+    if current_step == 2:
+        q2 = display_question("Q2 : Le produit alimentaire est-il congelé ?", ["Oui", "Non"], "q2")
+        decision_path.append(("Q2", q2))
+        current_node = current_node[q2]
+        current_step += 1
+
+    # Question 3
+    if current_step == 3:
+        q3 = display_question("Q3 : Le produit alimentaire subit-il un traitement assainissant validé éliminant toutes les spores des bactéries pathogènes ?", ["Oui", "Non"], "q3")
+        decision_path.append(("Q3", q3))
+        current_node = current_node[q3]
+        if q3 == "Oui":
+            current_step += 1
+        else:
+            final_decision = current_node['Décision']
+            final_explanation = current_node['Explication']
+            current_step = 10
+
+    # Question 4
+    if current_step == 4:
+        q4 = display_question("Q4 : Le produit alimentaire est-il soumis à un traitement assainissant validé éliminant toutes les cellules végétatives des bactéries pathogènes d'origine alimentaire ?", ["Oui", "Non"], "q4")
+        decision_path.append(("Q4", q4))
+        current_node = current_node[q4]
+        if q4 == "Oui":
+            current_step += 1
+        else:
+            current_step += 2
+
+    # Question 5a
+    if current_step == 5:
+        q5a = display_question("Q5a : Existe-t-il un risque de recontamination du produit alimentaire avant l'emballage ?", ["Oui", "Non"], "q5a")
+        decision_path.append(("Q5a", q5a))
+        current_node = current_node[q5a]
+        if q5a == "Oui":
+            current_step += 1
+        else:
+            final_decision = current_node['Décision']
+            final_explanation = current_node['Explication']
+            current_step = 10
+
+    # Question 5b
+    if current_step == 6:
+        q5b = display_question("Q5b : Y a-t-il un risque de recontamination du produit alimentaire avant son emballage ?", ["Oui", "Non"], "q5b")
+        decision_path.append(("Q5b", q5b))
+        current_node = current_node[q5b]
+        if q5b == "Oui":
+            current_step += 1
+        else:
+            final_decision = current_node['Décision']
+            final_explanation = current_node['Explication']
+            current_step = 10
+
+    # Question 6
+    if current_step == 7:
+        q6 = display_question("Q6 : Le produit alimentaire subit-il un second traitement assainissant validé éliminant toutes les cellules végétatives des bactéries pathogènes d'origine ?", ["Oui", "Non"], "q6")
+        decision_path.append(("Q6", q6))
+        current_node = current_node[q6]
+        if q6 == "Oui":
+            final_decision = current_node['Décision']
+            final_explanation = current_node['Explication']
+            current_step = 10
+        else:
+            final_decision = current_node['Décision']
+            final_explanation = current_node['Explication']
+            current_step = 10
+
+    # Question 7
+    if current_step == 8:
+        q7 = display_question("Q7 : Le traitement assainissant est-il appliqué à des produits emballés ou suivi d'un emballage aseptique ?", ["Oui", "Non"], "q7")
+        decision_path.append(("Q7", q7))
+        current_node = current_node[q7]
+        if q7 == "Oui":
+            final_decision = current_node['Décision']
+            final_explanation = current_node['Explication']
+            current_step = 10
+        else:
+            current_step += 1
 
     # Question 8
     if current_step == 9:
@@ -23,9 +266,9 @@
             ("0,88 à 0,9", "1,9 à 4,0"),
             # Ajouter toutes les combinaisons qui ne favorisent pas la croissance
         ]:
-            decision_path.append(("Q8", f"aw: {aw}, pH: {ph}"))
-            current_node = current_node['Q8'] # Accéder au noeud suivant 
-            current_step += 1
+            final_decision = current_node['Q8']['Décision']
+            final_explanation = current_node['Q8']['Explication']
+            current_step = 10
         else:
             current_step += 1
 
@@ -42,17 +285,17 @@
             ("<0,92", "4,6-5,6"),
             # Ajouter toutes les combinaisons qui ne favorisent pas la production de toxines
         ]:
-            decision_path.append(("Q9", f"aw: {aw2}, pH: {ph2}"))
-            current_node = current_node['Q9'] # Accéder au noeud suivant 
-            current_step += 1
+            final_decision = current_node['Q9']['Décision']
+            final_explanation = current_node['Q9']['Explication']
+            current_step = 11
         else:
-            current_step += 1
+            final_decision = current_node['Q9']['Décision']
+            final_explanation = current_node['Q9']['Explication']
+            current_step = 11
 
     # Affichage de la décision finale
     if current_step == 11:
-        if "Décision" in current_node: # Vérification de la présence de la clé
-            final_decision = current_node['Décision']
-            final_explanation = current_node['Explication']
+        if final_decision:
             st.success(f"Décision : {final_decision}")
             st.write(f"Explication : {final_explanation}")
             display_dgal_info(current_step)
