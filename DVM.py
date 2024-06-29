@@ -24,14 +24,14 @@ def main():
         st.subheader("3. Traitement assainissant validé:")
         q3 = st.radio("Q3 : Le produit alimentaire subit-il un traitement assainissant valide éliminant toutes les spores des bactéries pathogènes ?", ["Oui", "Non"])
 
-    # Risque de recontamination
-    if q2 == "Non" and q3 != "Oui":
-        st.markdown("---")
-        st.subheader("4. Risque de recontamination:")
-        q4 = st.radio("Q4 : Le produit alimentaire est-il soumis à un traitement assainissant valide éliminant toutes les cellules végétatives des bactéries pathogènes d'origine alimentaire ?", ["Oui", "Non"])
+        # Risque de recontamination
+        if (q2 == "Non" and q3 == "Oui") or (q2 == "Non" and q3 == "Non"):
+            st.markdown("---")
+            st.subheader("4. Risque de recontamination:")
+            q4 = st.radio("Q4 : Le produit alimentaire est-il soumis à un traitement assainissant valide éliminant toutes les cellules végétatives des bactéries pathogènes d'origine alimentaire ?", ["Oui", "Non"])
 
     # Risque de recontamination (bis)
-    if q4 == "Non" or (q4 is None and q2 == "Non" and q3 != "Oui"):
+    if (q4 == "Non" or (q4 is None and q2 == "Non" and q3 != "Oui")) and q2 == "Non":  # Vérifiez q2 ici aussi
         st.markdown("---")
         st.subheader("5. Risque de recontamination (bis):")
         q5a = st.radio("Q5a : Existe-t-il un risque de recontamination du produit alimentaire avant l'emballage ?", ["Oui", "Non"])
@@ -39,7 +39,7 @@ def main():
             q5b = st.radio("Q5b : Y-a-t-il un risque de recontamination du produit alimentaire avant son emballage ?", ["Oui", "Non"])
 
     # Second traitement assainissant validé
-    if (q4 == "Oui" or (q4 == "Non" and (q5a == "Non" or (q5a == "Oui" and q5b == "Non")))) or (q4 is None and q2 == "Non" and q3 == "Oui"):
+    if ((q4 == "Oui" or (q4 == "Non" and (q5a == "Non" or (q5a == "Oui" and q5b == "Non")))) or (q4 is None and q2 == "Non" and q3 == "Oui")) and q2 == "Non":  # Vérifiez q2 ici aussi
         st.markdown("---")
         st.subheader("6. Second traitement assainissant validé:")
         q6 = st.radio("Q6 : Le produit alimentaire subit-il un second traitement assainissant validé éliminant toutes les cellules végétatives des bactéries pathogènes d'origine ?", ["Oui", "Non"])
