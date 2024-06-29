@@ -25,13 +25,13 @@ def main():
         q3 = st.radio("Q3 : Le produit alimentaire subit-il un traitement assainissant valide éliminant toutes les spores des bactéries pathogènes ?", ["Oui", "Non"])
 
     # Risque de recontamination
-    if (q2 == "Non" and q3 == "Oui") or (q2 == "Non" and q3 == "Non"):
+    if q2 == "Non" and q3 != "Oui":
         st.markdown("---")
         st.subheader("4. Risque de recontamination:")
         q4 = st.radio("Q4 : Le produit alimentaire est-il soumis à un traitement assainissant valide éliminant toutes les cellules végétatives des bactéries pathogènes d'origine alimentaire ?", ["Oui", "Non"])
 
     # Risque de recontamination (bis)
-    if q4 == "Non":
+    if q4 == "Non" or (q4 is None and q2 == "Non" and q3 != "Oui"):
         st.markdown("---")
         st.subheader("5. Risque de recontamination (bis):")
         q5a = st.radio("Q5a : Existe-t-il un risque de recontamination du produit alimentaire avant l'emballage ?", ["Oui", "Non"])
@@ -39,7 +39,7 @@ def main():
             q5b = st.radio("Q5b : Y-a-t-il un risque de recontamination du produit alimentaire avant son emballage ?", ["Oui", "Non"])
 
     # Second traitement assainissant validé
-    if (q4 == "Oui" or (q4 == "Non" and (q5a == "Non" or (q5a == "Oui" and q5b == "Non")))):
+    if (q4 == "Oui" or (q4 == "Non" and (q5a == "Non" or (q5a == "Oui" and q5b == "Non")))) or (q4 is None and q2 == "Non" and q3 == "Oui"):
         st.markdown("---")
         st.subheader("6. Second traitement assainissant validé:")
         q6 = st.radio("Q6 : Le produit alimentaire subit-il un second traitement assainissant validé éliminant toutes les cellules végétatives des bactéries pathogènes d'origine ?", ["Oui", "Non"])
@@ -122,6 +122,62 @@ def main():
     else:
         st.success("Le produit alimentaire peut être étiqueté avec une DDM.")
         st.write("**Pas de croissance ni de production de toxines de bactéries pathogènes pendant la durée de conservation.** Le produit alimentaire peut être conservé à température ambiante sauf si des raisons de qualité exigent une réfrigération.")
+
+    st.markdown("---")
+    st.subheader("Tests:")
+    st.write("**Scenario 1:** Congelé -> DLC")
+    q1 = "Oui"
+    q2 = "Oui"
+    q10 = "Oui"
+    st.write(f"Q1: {q1} | Q2: {q2} | Q10: {q10} -> DLC")
+
+    st.write("**Scenario 2:** Pas congelé, Traitement assainissant valide, Pas de risque de recontamination -> DLC")
+    q1 = "Non"
+    q2 = "Non"
+    q3 = "Oui"
+    q4 = "Oui"
+    q10 = "Oui"
+    st.write(f"Q1: {q1} | Q2: {q2} | Q3: {q3} | Q4: {q4} | Q10: {q10} -> DLC")
+
+    st.write("**Scenario 3:** Pas congelé, Traitement assainissant validé, Risque de recontamination, Second traitement assainissant validé, Traitement appliqué à des produits emballés -> DLC")
+    q1 = "Non"
+    q2 = "Non"
+    q3 = "Oui"
+    q4 = "Non"
+    q5a = "Oui"
+    q5b = "Oui"
+    q6 = "Oui"
+    q7 = "Oui"
+    q10 = "Oui"
+    st.write(f"Q1: {q1} | Q2: {q2} | Q3: {q3} | Q4: {q4} | Q5a: {q5a} | Q5b: {q5b} | Q6: {q6} | Q7: {q7} | Q10: {q10} -> DLC")
+
+    st.write("**Scenario 4:** Pas congelé, Traitement assainissant validé, Risque de recontamination, Second traitement assainissant validé, Pas de traitement appliqué à des produits emballés, Croissance des bactéries, Pas de production de toxines, Capacité à démontrer -> DDM")
+    q1 = "Non"
+    q2 = "Non"
+    q3 = "Oui"
+    q4 = "Non"
+    q5a = "Oui"
+    q5b = "Oui"
+    q6 = "Oui"
+    q7 = "Non"
+    q8 = "F"
+    q9 = "NT"
+    q10 = "Oui"
+    st.write(f"Q1: {q1} | Q2: {q2} | Q3: {q3} | Q4: {q4} | Q5a: {q5a} | Q5b: {q5b} | Q6: {q6} | Q7: {q7} | Q8: {q8} | Q9: {q9} | Q10: {q10} -> DDM")
+
+    st.write("**Scenario 5:** Pas congelé, Traitement assainissant validé, Risque de recontamination, Second traitement assainissant validé, Pas de traitement appliqué à des produits emballés, Croissance des bactéries, Production de toxines, Pas de capacité à démontrer -> DDM")
+    q1 = "Non"
+    q2 = "Non"
+    q3 = "Oui"
+    q4 = "Non"
+    q5a = "Oui"
+    q5b = "Oui"
+    q6 = "Oui"
+    q7 = "Non"
+    q8 = "F"
+    q9 = "T"
+    q10 = "Non"
+    st.write(f"Q1: {q1} | Q2: {q2} | Q3: {q3} | Q4: {q4} | Q5a: {q5a} | Q5b: {q5b} | Q6: {q6} | Q7: {q7} | Q8: {q8} | Q9: {q9} | Q10: {q10} -> DDM")
 
 if __name__ == "__main__":
     main()
