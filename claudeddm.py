@@ -1,21 +1,94 @@
 import streamlit as st
 import pandas as pd
-from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
 from io import BytesIO
-from PIL import Image
 import base64
 
-# [Le dictionnaire 'questions' reste inchangé]
+# Définition des questions et explications
+questions = {
+    'q1': {
+        'question': "Le produit alimentaire est-il exempté de la DLC conformément au règlement (UE) n° 1169/2011 ou est-il couvert par d'autres dispositions de l'Union imposant d'autres types de marquage de la date ?",
+        'explanation': "Cette question vise à identifier si le produit est soumis à des réglementations spécifiques concernant l'étiquetage des dates."
+    },
+    'q2': {
+        'question': "Le produit alimentaire est-il congelé ?",
+        'explanation': "Les produits congelés ont des considérations spéciales en termes de durée de conservation."
+    },
+    'q3': {
+        'question': "Le produit alimentaire subit-il un traitement assainissant valide éliminant toutes les spores des bactéries pathogènes ?",
+        'explanation': "Un traitement assainissant qui élimine toutes les spores bactériennes pathogènes est un processus très intensif."
+    },
+    'q4': {
+        'question': "Le produit alimentaire est-il soumis à un traitement assainissant valide éliminant toutes les cellules végétatives des bactéries pathogènes d'origine alimentaire ?",
+        'explanation': "Ce traitement élimine les cellules bactériennes vivantes, mais pas nécessairement les spores."
+    },
+    'q5a': {
+        'question': "Existe-t-il un risque de recontamination du produit alimentaire avant l'emballage ?",
+        'explanation': "La recontamination peut se produire si le produit est exposé à l'environnement après le traitement."
+    },
+    'q5b': {
+        'question': "Y a-t-il un risque de recontamination du produit alimentaire avant son emballage ?",
+        'explanation': "Similaire à q5a, mais dans le contexte d'un produit qui n'a pas subi de traitement éliminant toutes les spores."
+    },
+    'q6': {
+        'question': "Le produit alimentaire subit-il un second traitement assainissant valide éliminant toutes les cellules végétatives des bactéries pathogènes d'origine ?",
+        'explanation': "Un second traitement peut être nécessaire si une recontamination s'est produite."
+    },
+    'q7': {
+        'question': "Le traitement assainissant est-il appliqué à des produits emballés ou suivi d'un emballage aseptique ?",
+        'explanation': "L'emballage aseptique aide à prévenir la recontamination après le traitement."
+    },
+    'q8': {
+        'question': "Le produit alimentaire favorise-t-il la croissance de bactéries ?",
+        'explanation': "Certains aliments fournissent un environnement propice à la croissance bactérienne."
+    },
+    'q9': {
+        'question': "Le produit alimentaire favorise-t-il la germination, la croissance et la production de toxines ?",
+        'explanation': "Certains aliments peuvent favoriser non seulement la croissance, mais aussi la production de toxines."
+    },
+    'q10': {
+        'question': "L'opérateur est-il en mesure de démontrer (approche par étapes décrite à la section 3.4) que le produit alimentaire ne favorise pas la croissance et/ou la production de toxines de bactéries pathogènes dans des conditions de température raisonnablement prévisibles pendant la distribution ?",
+        'explanation': "Cette démonstration nécessite généralement des tests et des analyses approfondis."
+    },
+    'finalQuestion': {
+        'question': "Pas de croissance ni de production de toxines de bactéries pathogènes pendant la durée de conservation. Le produit alimentaire peut être conservé à température ambiante sauf si des raisons de qualité exigent une réfrigération.",
+        'explanation': "Cette question finale détermine si le produit peut être conservé à température ambiante ou s'il nécessite une réfrigération."
+    }
+}
 
 def check_growth_factors(ph, aw):
-    # [Cette fonction reste inchangée]
+    ph = float(ph)
+    aw = float(aw)
+    
+    if ph <= 3.9 or aw <= 0.88:
+        return 'NF'
+    if (3.9 < ph <= 4.2) and (0.88 < aw <= 0.92):
+        return 'NF'
+    if (4.2 < ph <= 4.5) and (0.92 < aw <= 0.94):
+        return 'NF'
+    if (4.5 < ph <= 5.0) and aw > 0.94:
+        return 'F'
+    if ph > 5.0:
+        return 'F'
+    if aw <= 0.92:
+        return 'NT'
+    if (0.92 < aw <= 0.95) and ph <= 4.6:
+        return 'NT'
+    if aw > 0.95 and ph <= 5.2:
+        return 'NT'
+    
+    return 'T'
 
 def get_growth_factor_explanation(factor):
-    # [Cette fonction reste inchangée]
+    explanations = {
+        'NF': "NF : Ne favorise pas la croissance de bactéries",
+        'F': "F : Favorise la croissance de bactéries",
+        'NT': "NT : Ne favorise pas la production de toxines",
+        'T': "T : Favorise la production de toxines"
+    }
+    return explanations.get(factor, "")
 
 def generate_pdf_report(history, result):
     buffer = BytesIO()
@@ -38,9 +111,10 @@ def generate_pdf_report(history, result):
     # Historique des questions et réponses
     for question, answer in history:
         q_text = questions[question]['question']
+        explanation = questions[question]['explanation']
         elements.append(Paragraph(f"Q: {q_text}", styles['Heading3']))
         elements.append(Paragraph(f"R: {answer}", normal_style))
-        elements.append(Paragraph(f"Explication: {questions[question]['explanation']}", normal_style))
+        elements.append(Paragraph(f"Explication: {explanation}", normal_style))
         elements.append(Spacer(1, 0.1*inch))
 
     doc.build(elements)
@@ -53,6 +127,54 @@ def generate_download_link(history, result):
     href = f'<a href="data:application/pdf;base64,{b64}" download="decision_tree_results.pdf">Télécharger le rapport (PDF)</a>'
     return href
 
+def reset_session_state():
+    st.session_state.current_question = 'q1'
+    st.session_state.history = []
+    st.session_state.result = None
+    st.session_state.ph = ""
+    st.session_state.aw = ""
+    st.session_state.growth_factor = None
+
+def handle_answer(answer):
+    st.session_state.history.append((st.session_state.current_question, answer))
+    
+    if st.session_state.current_question == 'q1':
+        if answer == 'Oui':
+            st.session_state.result = 'Étiquetage selon réglementation en vigueur'
+        else:
+            st.session_state.current_question = 'q2'
+    elif st.session_state.current_question == 'q2':
+        st.session_state.result = 'DDM' if answer == 'Oui' else 'q3'
+    elif st.session_state.current_question == 'q3':
+        st.session_state.current_question = 'q5a' if answer == 'Oui' else 'q4'
+    elif st.session_state.current_question == 'q4':
+        if answer == 'Oui':
+            st.session_state.current_question = 'q5b'
+        else:
+            st.session_state.result = 'DLC'
+    elif st.session_state.current_question in ['q5a', 'q5b']:
+        st.session_state.current_question = 'q6' if answer == 'Oui' else 'q7'
+    elif st.session_state.current_question == 'q6':
+        st.session_state.current_question = 'q7' if answer == 'Oui' else 'DLC'
+    elif st.session_state.current_question == 'q7':
+        st.session_state.current_question = 'q8' if answer == 'Oui' else 'DLC'
+    elif st.session_state.current_question == 'q8':
+        if answer == 'F':
+            st.session_state.result = 'DLC'
+        else:
+            st.session_state.current_question = 'q9'
+    elif st.session_state.current_question == 'q9':
+        if answer in ['F', 'T']:
+            st.session_state.current_question = 'q10'
+        else:
+            st.session_state.current_question = 'finalQuestion'
+    elif st.session_state.current_question == 'q10':
+        st.session_state.result = 'DDM' if answer == 'Oui' else 'DLC'
+    elif st.session_state.current_question == 'finalQuestion':
+        st.session_state.result = 'DDM' if answer == 'Oui' else 'DLC'
+
+    st.experimental_rerun()
+
 def main():
     # Ajouter la bannière Visipilot
     st.image("visipilot_banner.PNG", use_column_width=True)
@@ -61,11 +183,7 @@ def main():
     st.write("Cet outil vous guide à travers l'arbre de décision EFSA pour déterminer si votre produit alimentaire nécessite une Date Limite de Consommation (DLC) ou une Date de Durabilité Minimale (DDM).")
 
     if 'current_question' not in st.session_state:
-        st.session_state.current_question = 'q1'
-    if 'history' not in st.session_state:
-        st.session_state.history = []
-    if 'result' not in st.session_state:
-        st.session_state.result = None
+        reset_session_state()
 
     if st.session_state.result is None:
         current_q = questions[st.session_state.current_question]
@@ -79,10 +197,9 @@ def main():
             with col2:
                 aw = st.number_input("Aw:", min_value=0.0, max_value=1.0, step=0.01)
             if st.button("Vérifier"):
-                factor, explanation = check_growth_factors(ph, aw)
+                factor = check_growth_factors(ph, aw)
                 st.session_state.history.append((st.session_state.current_question, f"pH: {ph}, Aw: {aw}, Résultat: {factor}"))
                 st.write(get_growth_factor_explanation(factor))
-                st.write(explanation)
                 if st.session_state.current_question == 'q8':
                     if factor == 'F':
                         st.session_state.result = 'DLC'
@@ -114,16 +231,11 @@ def main():
             st.write("Votre produit peut utiliser une Date de Durabilité Minimale (DDM). La DDM indique la date jusqu'à laquelle le produit conserve ses qualités spécifiques dans des conditions de conservation appropriées.")
         
         if st.button("Recommencer"):
-            st.session_state.current_question = 'q1'
-            st.session_state.history = []
-            st.session_state.result = None
+            reset_session_state()
             st.experimental_rerun()
 
         # Ajout du lien de téléchargement du PDF
         st.markdown(generate_download_link(st.session_state.history, st.session_state.result), unsafe_allow_html=True)
-
-def handle_answer(answer):
-    # [Cette fonction reste inchangée]
 
 if __name__ == "__main__":
     main()
