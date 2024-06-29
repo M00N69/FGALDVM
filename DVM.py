@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import os
+from PIL import Image
 
 # Fonction pour sauvegarder les décisions
 def save_decision(data):
@@ -55,8 +56,8 @@ def main():
 
     decisions = []
     current_step = 1
-    final_decision = None
-    final_explanation = None
+    final_decision = None  # Initialisation de la variable de décision finale
+    final_explanation = None  # Initialisation de la variable d'explication finale
 
     # Fonction pour afficher les informations détaillées de la note DGAL après chaque réponse
     def display_dgal_info(step):
@@ -134,23 +135,15 @@ def main():
                                     },
                                     "Non": {
                                         "Q8": {
-                                            "Oui": {
-                                                "Décision": "DDM",
-                                                "Explication": "Le produit ne favorise pas la croissance des bactéries.",
-                                            },
-                                            "Non": {
-                                                "Q9": {
-                                                    "Oui": {
-                                                        "Décision": "DDM",
-                                                        "Explication": "Le produit ne favorise pas la germination, la croissance et la production de toxines.",
-                                                    },
-                                                    "Non": {
-                                                        "Décision": "DLC",
-                                                        "Explication": "Le produit favorise la germination, la croissance et la production de toxines.",
-                                                    }
-                                                }
-                                            }
-                                        }
+                                            # Ajouter les conditions pour aw et pH
+                                            "Décision": "DDM",
+                                            "Explication": "Le produit ne favorise pas la croissance des bactéries.",
+                                        },
+                                        "Q9": {
+                                            # Ajouter les conditions pour aw2 et pH2
+                                            "Décision": "DDM",
+                                            "Explication": "Le produit ne favorise pas la germination, la croissance et la production de toxines.",
+                                        },
                                     }
                                 }
                             }
@@ -162,10 +155,10 @@ def main():
     }
 
     # Navigation dans l'arbre de décision
-    current_node = tree["Q1"]
-    decision_path = []
-    justifications = {}
-    uploaded_files = {}
+    current_node = tree
+    decision_path = []  # Liste pour stocker le chemin de décision
+    justifications = {}  # Dictionnaire pour stocker les justifications
+    uploaded_files = {}  # Dictionnaire pour stocker les fichiers téléchargés
 
     # Fonction pour afficher les questions et les réponses
     def display_question(question, options, key):
@@ -173,74 +166,147 @@ def main():
         answer = st.radio("", options, key=key)
         return answer
 
-    # Fonction pour gérer les étapes de l'arbre de décision
-    def next_step(question, key, node):
-        answer = display_question(question, ["Oui", "Non"], key)
-        if answer in node:
-            return node[answer], answer
+    # Question 1
+    if current_step == 1:
+        q1 = display_question("Q1 : Le produit alimentaire est-il exempt de la DLC conformément au règlement (UE) n° 1169/2011 ou est-il couvert par d'autres dispositions de l'Union imposant d'autres types de marquage de la date ?", ["Oui", "Non"], "q1")
+        if q1 == "Oui":
+            decision_path.append(("Q1", q1))
+            current_node = current_node[q1]
+            current_step += 1
         else:
-            st.error("Erreur dans l'arbre de décision.")
-            return None, None
-
-    while current_step < 11:
-        if "Décision" in current_node:
-            final_decision = current_node["Décision"]
-            final_explanation = current_node["Explication"]
-            break
-        else:
-            if current_step == 1:
-                question = "Q1 : Le produit alimentaire est-il exempt de la DLC conformément au règlement (UE) n° 1169/2011 ou est-il couvert par d'autres dispositions de l'Union imposant d'autres types de marquage de la date ?"
-                key = "q1"
-            elif current_step == 2:
-                question = "Q2 : Le produit alimentaire est-il congelé ?"
-                key = "q2"
-            elif current_step == 3:
-                question = "Q3 : Le produit alimentaire subit-il un traitement assainissant validé éliminant toutes les spores des bactéries pathogènes ?"
-                key = "q3"
-            elif current_step == 4:
-                question = "Q4 : Le produit alimentaire est-il soumis à un traitement assainissant validé éliminant toutes les cellules végétatives des bactéries pathogènes d'origine alimentaire ?"
-                key = "q4"
-            elif current_step == 5:
-                question = "Q5a : Existe-t-il un risque de recontamination du produit alimentaire avant l'emballage ?"
-                key = "q5a"
-            elif current_step == 6:
-                question = "Q5b : Y a-t-il un risque de recontamination du produit alimentaire avant son emballage ?"
-                key = "q5b"
-            elif current_step == 7:
-                question = "Q6 : Le produit alimentaire subit-il un second traitement assainissant validé éliminant toutes les cellules végétatives des bactéries pathogènes d'origine ?"
-                key = "q6"
-            elif current_step == 8:
-                question = "Q7 : Le traitement assainissant est-il appliqué à des produits emballés ou suivi d'un emballage aseptique ?"
-                key = "q7"
-            elif current_step == 9:
-                question = "Q8 : Le produit alimentaire favorise-t-il la croissance des bactéries ?"
-                key = "q8"
-            elif current_step == 10:
-                question = "Q9 : Le produit alimentaire favorise-t-il la germination, la croissance et la production de toxines ?"
-                key = "q9"
-
-            current_node, answer = next_step(question, key, current_node)
-            if current_node is None:
-                break
-            decision_path.append((question, answer))
-            justification = st.text_area(f"Justifiez votre réponse ({key})", key=f"justification_{key}")
-            doc = st.file_uploader(f"Téléchargez un document justificatif ({key})", key=f"doc_{key}", type=["pdf", "jpg", "png"])
-            if doc:
-                doc_name = doc.name
-                with open(os.path.join("uploads", doc_name), "wb") as f:
-                    f.write(doc.getbuffer())
-                uploaded_files[key] = doc_name
-            justifications[key] = justification
+            decision_path.append(("Q1", q1))
+            current_node = current_node[q1]
             current_step += 1
 
+    # Question 2
+    if current_step == 2:
+        q2 = display_question("Q2 : Le produit alimentaire est-il congelé ?", ["Oui", "Non"], "q2")
+        decision_path.append(("Q2", q2))
+        current_node = current_node[q2]
+        current_step += 1
+
+    # Question 3
+    if current_step == 3:
+        q3 = display_question("Q3 : Le produit alimentaire subit-il un traitement assainissant validé éliminant toutes les spores des bactéries pathogènes ?", ["Oui", "Non"], "q3")
+        decision_path.append(("Q3", q3))
+        current_node = current_node[q3]
+        if q3 == "Oui":
+            current_step += 1
+        else:
+            final_decision = current_node['Décision']
+            final_explanation = current_node['Explication']
+            current_step = 10
+
+    # Question 4
+    if current_step == 4:
+        q4 = display_question("Q4 : Le produit alimentaire est-il soumis à un traitement assainissant validé éliminant toutes les cellules végétatives des bactéries pathogènes d'origine alimentaire ?", ["Oui", "Non"], "q4")
+        decision_path.append(("Q4", q4))
+        current_node = current_node[q4]
+        if q4 == "Oui":
+            current_step += 1
+        else:
+            current_step += 2
+
+    # Question 5a
+    if current_step == 5:
+        q5a = display_question("Q5a : Existe-t-il un risque de recontamination du produit alimentaire avant l'emballage ?", ["Oui", "Non"], "q5a")
+        decision_path.append(("Q5a", q5a))
+        current_node = current_node[q5a]
+        if q5a == "Oui":
+            current_step += 1
+        else:
+            final_decision = current_node['Décision']
+            final_explanation = current_node['Explication']
+            current_step = 10
+
+    # Question 5b
+    if current_step == 6:
+        q5b = display_question("Q5b : Y a-t-il un risque de recontamination du produit alimentaire avant son emballage ?", ["Oui", "Non"], "q5b")
+        decision_path.append(("Q5b", q5b))
+        current_node = current_node[q5b]
+        if q5b == "Oui":
+            current_step += 1
+        else:
+            final_decision = current_node['Décision']
+            final_explanation = current_node['Explication']
+            current_step = 10
+
+    # Question 6
+    if current_step == 7:
+        q6 = display_question("Q6 : Le produit alimentaire subit-il un second traitement assainissant validé éliminant toutes les cellules végétatives des bactéries pathogènes d'origine ?", ["Oui", "Non"], "q6")
+        decision_path.append(("Q6", q6))
+        current_node = current_node[q6]
+        if q6 == "Oui":
+            final_decision = current_node['Décision']
+            final_explanation = current_node['Explication']
+            current_step = 10
+        else:
+            final_decision = current_node['Décision']
+            final_explanation = current_node['Explication']
+            current_step = 10
+
+    # Question 7
+    if current_step == 8:
+        q7 = display_question("Q7 : Le traitement assainissant est-il appliqué à des produits emballés ou suivi d'un emballage aseptique ?", ["Oui", "Non"], "q7")
+        decision_path.append(("Q7", q7))
+        current_node = current_node[q7]
+        if q7 == "Oui":
+            final_decision = current_node['Décision']
+            final_explanation = current_node['Explication']
+            current_step = 10
+        else:
+            current_step += 1
+
+    # Question 8
+    if current_step == 9:
+        st.markdown("""
+        ## **Q8 : Le produit alimentaire favorise-t-il la croissance des bactéries ?**
+        """)
+        aw = st.selectbox("aw", ["<0,88", "0,88 à 0,9", ">0,9 à 0,92", "0,92 à 0,96", ">0,96"], key="aw")
+        ph = st.selectbox("pH", ["1,9 à 4,0", "4,0 à 4,2", "4,2 à 4,4", "4,4 à 5", ">5"], key="ph")
+        
+        if (aw, ph) in [
+            ("<0,88", "1,9 à 4,0"),
+            ("<0,88", "4,0 à 4,2"),
+            ("0,88 à 0,9", "1,9 à 4,0"),
+            # Ajouter toutes les combinaisons qui ne favorisent pas la croissance
+        ]:
+            final_decision = current_node['Q8']['Décision']
+            final_explanation = current_node['Q8']['Explication']
+            current_step = 10
+        else:
+            current_step += 1
+
+    # Question 9
+    if current_step == 10:
+        st.markdown("""
+        ## **Q9 : Le produit alimentaire favorise-t-il la germination, la croissance et la production de toxines ?**
+        """)
+        aw2 = st.selectbox("aw2", ["<0,92", "0,92 à 0,95", ">0,95"], key="aw2")
+        ph2 = st.selectbox("pH2", ["<4,6", "4,6-5,6", ">5,6"], key="ph2")
+        
+        if (aw2, ph2) in [
+            ("<0,92", "<4,6"),
+            ("<0,92", "4,6-5,6"),
+            # Ajouter toutes les combinaisons qui ne favorisent pas la production de toxines
+        ]:
+            final_decision = current_node['Q9']['Décision']
+            final_explanation = current_node['Q9']['Explication']
+            current_step = 11
+        else:
+            final_decision = current_node['Q9']['Décision']
+            final_explanation = current_node['Q9']['Explication']
+            current_step = 11
+
     # Affichage de la décision finale
-    if final_decision:
-        st.success(f"Décision : {final_decision}")
-        st.write(f"Explication : {final_explanation}")
-        display_dgal_info(current_step)
-        decisions.append({"Question": "Décision finale", "Réponse": "N/A", "Décision": final_decision})
-    else:
-        st.error("Erreur dans l'arbre de décision.")
+    if current_step == 11:
+        if final_decision:
+            st.success(f"Décision : {final_decision}")
+            st.write(f"Explication : {final_explanation}")
+            display_dgal_info(current_step)
+            decisions.append({"Question": "Décision finale", "Réponse": "N/A", "Décision": final_decision})
+        else:
+            st.error("Erreur dans l'arbre de décision.")
 
     # Sauvegarde des décisions
     if st.button("Sauvegarder les décisions", key="save_button"):
