@@ -149,19 +149,31 @@ def main():
                                     },
                                     "Non": {
                                         "Q8": {
-                                            # Ajouter les conditions pour aw et pH
                                             "Décision": "DDM",
                                             "Explication": "Le produit ne favorise pas la croissance des bactéries.",
-                                        },
-                                        "Q9": {
-                                            # Ajouter les conditions pour aw2 et pH2
-                                            "Décision": "DDM",
-                                            "Explication": "Le produit ne favorise pas la germination, la croissance et la production de toxines.",
-                                        },
+                                        }
                                     }
                                 }
                             }
                         }
+                    }
+                }
+            }
+        },
+        "Q8": {
+            "Oui": {
+                "Décision": "DDM",
+                "Explication": "Le produit ne favorise pas la croissance des bactéries."
+            },
+            "Non": {
+                "Q9": {
+                    "Oui": {
+                        "Décision": "DDM",
+                        "Explication": "Le produit ne favorise pas la germination, la croissance et la production de toxines."
+                    },
+                    "Non": {
+                        "Décision": "DLC",
+                        "Explication": "Le produit favorise la germination, la croissance et la production de toxines."
                     }
                 }
             }
@@ -170,7 +182,7 @@ def main():
 
     # Variables pour la navigation dans l'arbre de décision
     current_node = tree["Q1"]
-    current_step = 1
+    current_step = "Q1"
 
     # Fonction pour afficher les questions et les réponses
     def display_question(question, options, key):
@@ -179,229 +191,45 @@ def main():
         return answer
 
     # Fonction pour gérer les étapes de l'arbre de décision
-    def next_step(question, key, node):
-        answer = display_question(question, ["Oui", "Non"], key)
+    def next_step(node, answer):
         if answer in node:
-            return node[answer], answer
+            return node[answer]
         else:
             st.error("Erreur dans l'arbre de décision.")
-            return None, None
+            return None
 
     decision_path = []  # Liste pour stocker le chemin de décision
     justifications = {}  # Dictionnaire pour stocker les justifications
     uploaded_files = {}  # Dictionnaire pour stocker les fichiers téléchargés
 
-    # Processus de l'arbre de décision
-    if current_step == 1:
-        q1 = display_question("Q1 : Le produit alimentaire est-il exempt de la DLC conformément au règlement (UE) n° 1169/2011 ou est-il couvert par d'autres dispositions de l'Union imposant d'autres types de marquage de la date ?", ["Oui", "Non"], "q1")
-        if q1 == "Oui":
-            st.success(f"Décision : {current_node[q1]['Décision']}")
-            st.write(f"Explication : {current_node[q1]['Explication']}")
-            display_dgal_info("Q1")
-            decisions.append({"Question": "Q1", "Réponse": q1, "Décision": current_node[q1]['Décision']})
-            current_step = 11  # Fin de l'arbre
-        else:
-            current_node = current_node[q1]
-            decision_path.append(("Q1", q1))
-            justification_q1 = st.text_area("Justifiez votre réponse (Q1)", key="justification_q1")
-            doc_q1 = st.file_uploader("Téléchargez un document justificatif (Q1)", key="doc_q1", type=["pdf", "jpg", "png"])
-            if doc_q1:
-                doc_q1_name = doc_q1.name
-                with open(os.path.join("uploads", doc_q1_name), "wb") as f:
-                    f.write(doc_q1.getbuffer())
-                uploaded_files["Q1"] = doc_q1_name
-            justifications["Q1"] = justification_q1
-            current_step += 1
-
-    if current_step == 2:
-        current_node, answer = next_step("Q2 : Le produit alimentaire est-il congelé ?", "q2", current_node)
-        if current_node:
-            decision_path.append(("Q2", answer))
-            justification_q2 = st.text_area("Justifiez votre réponse (Q2)", key="justification_q2")
-            doc_q2 = st.file_uploader("Téléchargez un document justificatif (Q2)", key="doc_q2", type=["pdf", "jpg", "png"])
-            if doc_q2:
-                doc_q2_name = doc_q2.name
-                with open(os.path.join("uploads", doc_q2_name), "wb") as f:
-                    f.write(doc_q2.getbuffer())
-                uploaded_files["Q2"] = doc_q2_name
-            justifications["Q2"] = justification_q2
-            current_step += 1
-
-    if current_step == 3:
-        current_node, answer = next_step("Q3 : Le produit alimentaire subit-il un traitement assainissant validé éliminant toutes les spores des bactéries pathogènes ?", "q3", current_node)
-        if current_node:
-            decision_path.append(("Q3", answer))
-            justification_q3 = st.text_area("Justifiez votre réponse (Q3)", key="justification_q3")
-            doc_q3 = st.file_uploader("Téléchargez un document justificatif (Q3)", key="doc_q3", type=["pdf", "jpg", "png"])
-            if doc_q3:
-                doc_q3_name = doc_q3.name
-                with open(os.path.join("uploads", doc_q3_name), "wb") as f:
-                    f.write(doc_q3.getbuffer())
-                uploaded_files["Q3"] = doc_q3_name
-            justifications["Q3"] = justification_q3
-            if answer == "Oui":
-                current_step = 5
-            else:
-                st.error(f"Décision : {current_node['Décision']}")
-                st.write(f"Explication : {current_node['Explication']}")
-                display_dgal_info("Q3")
-                decisions.append({"Question": "Q3", "Réponse": answer, "Décision": current_node['Décision']})
-                current_step = 11
-
-    if current_step == 4:
-        current_node, answer = next_step("Q4 : Le produit alimentaire est-il soumis à un traitement assainissant validé éliminant toutes les cellules végétatives des bactéries pathogènes d'origine alimentaire ?", "q4", current_node)
-        if current_node:
-            decision_path.append(("Q4", answer))
-            justification_q4 = st.text_area("Justifiez votre réponse (Q4)", key="justification_q4")
-            doc_q4 = st.file_uploader("Téléchargez un document justificatif (Q4)", key="doc_q4", type=["pdf", "jpg", "png"])
-            if doc_q4:
-                doc_q4_name = doc_q4.name
-                with open(os.path.join("uploads", doc_q4_name), "wb") as f:
-                    f.write(doc_q4.getbuffer())
-                uploaded_files["Q4"] = doc_q4_name
-            justifications["Q4"] = justification_q4
-            if answer == "Oui":
-                current_step = 6
-            else:
-                current_step = 8
-
-    if current_step == 5:
-        current_node, answer = next_step("Q5a : Existe-t-il un risque de recontamination du produit alimentaire avant l'emballage ?", "q5a", current_node)
-        if current_node:
-            decision_path.append(("Q5a", answer))
-            justification_q5a = st.text_area("Justifiez votre réponse (Q5a)", key="justification_q5a")
-            doc_q5a = st.file_uploader("Téléchargez un document justificatif (Q5a)", key="doc_q5a", type=["pdf", "jpg", "png"])
-            if doc_q5a:
-                doc_q5a_name = doc_q5a.name
-                with open(os.path.join("uploads", doc_q5a_name), "wb") as f:
-                    f.write(doc_q5a.getbuffer())
-                uploaded_files["Q5a"] = doc_q5a_name
-            justifications["Q5a"] = justification_q5a
-            if answer == "Oui":
-                current_step = 7
-            else:
-                st.success(f"Décision : {current_node['Décision']}")
-                st.write(f"Explication : {current_node['Explication']}")
-                display_dgal_info("Q5a")
-                decisions.append({"Question": "Q5a", "Réponse": answer, "Décision": current_node['Décision']})
-                current_step = 11
-
-    if current_step == 6:
-        current_node, answer = next_step("Q5b : Y a-t-il un risque de recontamination du produit alimentaire avant son emballage ?", "q5b", current_node)
-        if current_node:
-            decision_path.append(("Q5b", answer))
-            justification_q5b = st.text_area("Justifiez votre réponse (Q5b)", key="justification_q5b")
-            doc_q5b = st.file_uploader("Téléchargez un document justificatif (Q5b)", key="doc_q5b", type=["pdf", "jpg", "png"])
-            if doc_q5b:
-                doc_q5b_name = doc_q5b.name
-                with open(os.path.join("uploads", doc_q5b_name), "wb") as f:
-                    f.write(doc_q5b.getbuffer())
-                uploaded_files["Q5b"] = doc_q5b_name
-            justifications["Q5b"] = justification_q5b
-            if answer == "Oui":
-                current_step = 7
-            else:
-                st.success(f"Décision : {current_node['Décision']}")
-                st.write(f"Explication : {current_node['Explication']}")
-                display_dgal_info("Q5b")
-                decisions.append({"Question": "Q5b", "Réponse": answer, "Décision": current_node['Décision']})
-                current_step = 11
-
-    if current_step == 7:
-        current_node, answer = next_step("Q6 : Le produit alimentaire subit-il un second traitement assainissant validé éliminant toutes les cellules végétatives des bactéries pathogènes d'origine ?", "q6", current_node)
-        if current_node:
-            decision_path.append(("Q6", answer))
-            justification_q6 = st.text_area("Justifiez votre réponse (Q6)", key="justification_q6")
-            doc_q6 = st.file_uploader("Téléchargez un document justificatif (Q6)", key="doc_q6", type=["pdf", "jpg", "png"])
-            if doc_q6:
-                doc_q6_name = doc_q6.name
-                with open(os.path.join("uploads", doc_q6_name), "wb") as f:
-                    f.write(doc_q6.getbuffer())
-                uploaded_files["Q6"] = doc_q6_name
-            justifications["Q6"] = justification_q6
-            if answer == "Oui":
-                st.success(f"Décision : {current_node['Décision']}")
-                st.write(f"Explication : {current_node['Explication']}")
-                display_dgal_info("Q6")
-                decisions.append({"Question": "Q6", "Réponse": answer, "Décision": current_node['Décision']})
-                current_step = 11
-            else:
-                st.error(f"Décision : {current_node['Décision']}")
-                st.write(f"Explication : {current_node['Explication']}")
-                display_dgal_info("Q6")
-                decisions.append({"Question": "Q6", "Réponse": answer, "Décision": current_node['Décision']})
-                current_step = 11
-
-    if current_step == 8:
-        current_node, answer = next_step("Q7 : Le traitement assainissant est-il appliqué à des produits emballés ou suivi d'un emballage aseptique ?", "q7", current_node)
-        if current_node:
-            decision_path.append(("Q7", answer))
-            justification_q7 = st.text_area("Justifiez votre réponse (Q7)", key="justification_q7")
-            doc_q7 = st.file_uploader("Téléchargez un document justificatif (Q7)", key="doc_q7", type=["pdf", "jpg", "png"])
-            if doc_q7:
-                doc_q7_name = doc_q7.name
-                with open(os.path.join("uploads", doc_q7_name), "wb") as f:
-                    f.write(doc_q7.getbuffer())
-                uploaded_files["Q7"] = doc_q7_name
-            justifications["Q7"] = justification_q7
-            if answer == "Oui":
-                st.success(f"Décision : {current_node['Décision']}")
-                st.write(f"Explication : {current_node['Explication']}")
-                display_dgal_info("Q7")
-                decisions.append({"Question": "Q7", "Réponse": answer, "Décision": current_node['Décision']})
-                current_step = 11
-            else:
-                current_step += 1
-
-    if current_step == 9:
-        st.markdown("""
-        ## **Q8 : Le produit alimentaire favorise-t-il la croissance des bactéries ?**
-        """)
-        aw = st.selectbox("aw", ["<0,88", "0,88 à 0,9", ">0,9 à 0,92", "0,92 à 0,96", ">0,96"], key="aw")
-        ph = st.selectbox("pH", ["1,9 à 4,0", "4,0 à 4,2", "4,2 à 4,4", "4,4 à 5", ">5"], key="ph")
-        
-        if (aw, ph) in [
-            ("<0,88", "1,9 à 4,0"),
-            ("<0,88", "4,0 à 4,2"),
-            ("0,88 à 0,9", "1,9 à 4,0"),
-            # Ajouter toutes les combinaisons qui ne favorisent pas la croissance
-        ]:
+    while True:
+        if "Décision" in current_node:
             st.success(f"Décision : {current_node['Décision']}")
             st.write(f"Explication : {current_node['Explication']}")
-            display_dgal_info("Q8")
-            decisions.append({"Question": "Q8", "Réponse": f"aw: {aw}, pH: {ph}", "Décision": current_node['Décision']})
-            current_step = 11
+            display_dgal_info(current_step)
+            decisions.append({"Question": current_step, "Réponse": answer, "Décision": current_node['Décision']})
+            break
         else:
-            current_step += 1
-
-    if current_step == 10:
-        st.markdown("""
-        ## **Q9 : Le produit alimentaire favorise-t-il la germination, la croissance et la production de toxines ?**
-        """)
-        aw2 = st.selectbox("aw2", ["<0,92", "0,92 à 0,95", ">0,95"], key="aw2")
-        ph2 = st.selectbox("pH2", ["<4,6", "4,6-5,6", ">5,6"], key="ph2")
-        
-        if (aw2, ph2) in [
-            ("<0,92", "<4,6"),
-            ("<0,92", "4,6-5,6"),
-            # Ajouter toutes les combinaisons qui ne favorisent pas la production de toxines
-        ]:
-            st.success(f"Décision : {current_node['Décision']}")
-            st.write(f"Explication : {current_node['Explication']}")
-            display_dgal_info("Q9")
-            decisions.append({"Question": "Q9", "Réponse": f"aw: {aw2}, pH: {ph2}", "Décision": current_node['Décision']})
-            current_step = 11
-        else:
-            st.error(f"Décision : {current_node['Décision']}")
-            st.write(f"Explication : {current_node['Explication']}")
-            display_dgal_info("Q9")
-            decisions.append({"Question": "Q9", "Réponse": f"aw: {aw2}, pH: {ph2}", "Décision": current_node['Décision']})
-            current_step = 11
+            question = current_step + " : " + list(current_node.keys())[0]
+            options = list(current_node[list(current_node.keys())[0]].keys())
+            answer = display_question(question, options, current_step)
+            current_node = next_step(current_node[list(current_node.keys())[0]], answer)
+            if current_node is None:
+                break
+            decision_path.append((current_step, answer))
+            justification = st.text_area(f"Justifiez votre réponse ({current_step})", key=f"justification_{current_step}")
+            doc = st.file_uploader(f"Téléchargez un document justificatif ({current_step})", key=f"doc_{current_step}", type=["pdf", "jpg", "png"])
+            if doc:
+                doc_name = doc.name
+                with open(os.path.join("uploads", doc_name), "wb") as f:
+                    f.write(doc.getbuffer())
+                uploaded_files[current_step] = doc_name
+            justifications[current_step] = justification
+            current_step = answer
 
     # Fin du processus
-    if current_step == 11:
-        st.markdown("## **Fin du processus de détermination**")
-        st.write("Cliquez sur le bouton ci-dessous pour sauvegarder vos décisions.")
+    st.markdown("## **Fin du processus de détermination**")
+    st.write("Cliquez sur le bouton ci-dessous pour sauvegarder vos décisions.")
 
     # Sauvegarde des décisions
     if st.button("Sauvegarder les décisions", key="save_button"):
@@ -412,4 +240,5 @@ if __name__ == "__main__":
     if not os.path.exists("uploads"):
         os.makedirs("uploads")
     main()
+
 
