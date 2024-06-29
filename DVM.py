@@ -168,7 +168,7 @@ def main():
     if current_step == 1:
         q1 = display_question("Q1 : Le produit alimentaire est-il exempt de la DLC conformément au règlement (UE) n° 1169/2011 ou est-il couvert par d'autres dispositions de l'Union imposant d'autres types de marquage de la date ?", ["Oui", "Non"], "q1")
         if q1 == "Oui":
-            st.success(f"Décision : {current_node[q1]['Décision']}")
+            st.success(f"Décision : {current_node[q1]['Décision']}")  # Accès direct au dictionnaire
             st.write(f"Explication : {current_node[q1]['Explication']}")
             display_dgal_info(current_step)
             decisions.append({"Question": "Q1", "Réponse": q1, "Décision": current_node[q1]['Décision']})
@@ -176,7 +176,7 @@ def main():
         else:
             decision_path.append(("Q1", q1))
             current_node = current_node[q1]
-            current_step += 1
+            current_step += 1 # Passer à la prochaine question
 
     # Question 2
     if current_step == 2:
