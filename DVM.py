@@ -1,129 +1,118 @@
 import streamlit as st
 
-questions = {
-    "q1": "Le produit alimentaire est-il exempté de la DLC conformément au règlement (UE) n° 1169/2011 ou est-il couvert par d'autres dispositions de l'Union imposant d'autres types de marquage de la date ?",
-    "q2": "Le produit alimentaire est-il congelé ?",
-    "q3": "Le produit alimentaire subit-il un traitement assainissant valide éliminant toutes les spores des bactéries pathogènes ?",
-    "q4": "Le produit alimentaire est-il soumis à un traitement assainissant valide éliminant toutes les cellules végétatives des bactéries pathogènes d'origine alimentaire ?",
-    "q5a": "Existe-t-il un risque de recontamination du produit alimentaire avant l'emballage ?",
-    "q5b": "Y a-t-il un risque de recontamination du produit alimentaire avant son emballage ?",
-    "q6": "Le produit alimentaire subit-il un second traitement assainissant valide éliminant toutes les cellules végétatives des bactéries pathogènes d'origine ?",
-    "q7": "Le traitement assainissant est-il appliqué à des produits emballés ou suivi d'un emballage aseptique ?",
-    "q8": "Le produit alimentaire favorise-t-il la croissance de bactéries ?",
-    "q9": "Le produit alimentaire favorise-t-il la germination, la croissance et la production de toxines ?",
-    "q10": "L'opérateur est-il en mesure de démontrer (approche par étapes décrite à la section 3.4) que le produit alimentaire ne favorise pas la croissance et/ou la production de toxines de bactéries pathogènes dans des conditions de température raisonnablement prévisibles pendant la distribution ?",
-    "finalQuestion": "Pas de croissance ni de production de toxines de bactéries pathogènes pendant la durée de conservation. Le produit alimentaire peut être conservé à température ambiante sauf si des raisons de qualité exigent une réfrigération."
-}
-
-def check_growth_factors(ph, aw):
-    ph_value = float(ph)
-    aw_value = float(aw)
-
-    if ph_value <= 3.9 or aw_value <= 0.88:
-        return 'NF'
-    if (ph_value > 3.9 and ph_value <= 4.2) and (aw_value > 0.88 and aw_value <= 0.92):
-        return 'NF'
-    if (ph_value > 4.2 and ph_value <= 4.5) and (aw_value > 0.92 and aw_value <= 0.94):
-        return 'NF'
-    if (ph_value > 4.5 and ph_value <= 5.0) and aw_value > 0.94:
-        return 'F'
-    if ph_value > 5.0:
-        return 'F'
-    if aw_value <= 0.92:
-        return 'NT'
-    if (aw_value > 0.92 and aw_value <= 0.95) and ph_value <= 4.6:
-        return 'NT'
-    if aw_value > 0.95 and ph_value <= 5.2:
-        return 'NT'
-    return 'T'
-
 def main():
-    st.title("Arbre de décision EFSA : DLC ou DDM")
-    
-    if "current_question" not in st.session_state:
-        st.session_state.current_question = "q1"
-        st.session_state.result = None
-        st.session_state.ph = ""
-        st.session_state.aw = ""
-        st.session_state.growth_factor = None
+    st.title("Détermination DLC ou DDM")
+    st.write("Utilisez cet outil pour déterminer si votre produit alimentaire doit être étiqueté avec une Date Limite de Consommation (DLC) ou une Date de Durabilité Minimale (DDM).")
 
-    if st.session_state.result:
-        st.success(f"Résultat final : {st.session_state.result}")
-        if st.button("Recommencer"):
-            st.session_state.current_question = "q1"
-            st.session_state.result = None
-            st.session_state.ph = ""
-            st.session_state.aw = ""
-            st.session_state.growth_factor = None
+    # Etiquetage selon la réglementation en vigueur
+    st.markdown("---")
+    st.subheader("1. Étiquetage selon la réglementation en vigueur:")
+    q1 = st.radio("Q1 : Le produit alimentaire est-il exempt de la DLC conformément au règlement (UE) n° 1169/2011 ou est-il couvert par d'autres dispositions de l'Union imposant d'autres types de marquage de la date ?", ["Oui", "Non"])
+
+    if q1 == "Oui":
+        st.success("Etiquetage selon la réglementation en vigueur.")
+        st.stop()
+
+    # Congélation du produit
+    st.markdown("---")
+    st.subheader("2. Congélation du produit:")
+    q2 = st.radio("Q2 : Le produit alimentaire est-il congelé ?", ["Oui", "Non"])
+
+    # Traitement assainissant validé
+    st.markdown("---")
+    st.subheader("3. Traitement assainissant validé:")
+    q3 = st.radio("Q3 : Le produit alimentaire subit-il un traitement assainissant valide éliminant toutes les spores des bactéries pathogènes ?", ["Oui", "Non"])
+
+    # Risque de recontamination
+    st.markdown("---")
+    st.subheader("4. Risque de recontamination:")
+    q4 = st.radio("Q4 : Le produit alimentaire est-il soumis à un traitement assainissant valide éliminant toutes les cellules végétatives des bactéries pathogènes d'origine alimentaire ?", ["Oui", "Non"])
+
+    # Risque de recontamination (bis)
+    st.markdown("---")
+    st.subheader("5. Risque de recontamination (bis):")
+    q5a = st.radio("Q5a : Existe-t-il un risque de recontamination du produit alimentaire avant l'emballage ?", ["Oui", "Non"])
+    q5b = st.radio("Q5b : Y-a-t-il un risque de recontamination du produit alimentaire avant son emballage ?", ["Oui", "Non"])
+
+    # Second traitement assainissant validé
+    st.markdown("---")
+    st.subheader("6. Second traitement assainissant validé:")
+    q6 = st.radio("Q6 : Le produit alimentaire subit-il un second traitement assainissant validé éliminant toutes les cellules végétatives des bactéries pathogènes d'origine ?", ["Oui", "Non"])
+
+    # Traitement assainissant appliqué à des produits emballés ou suivi d'un emballage aseptique
+    st.markdown("---")
+    st.subheader("7. Traitement assainissant appliqué à des produits emballés ou suivi d'un emballage aseptique:")
+    q7 = st.radio("Q7 : Le traitement assainissant est-il appliqué à des produits emballés ou suivi d'un emballage aseptique ?", ["Oui", "Non"])
+
+    # Croissance des bactéries
+    st.markdown("---")
+    st.subheader("8. Croissance des bactéries:")
+    st.write("Pour répondre, vérifiez le tableau suivant :")
+    st.write("F : Favorise la croissance | NF : Ne favorise pas la croissance")
+
+    aw = st.slider("Choisissez la valeur de l'activité de l'eau (aw) : ", 0.0, 1.0, 0.88, step=0.01)
+    ph = st.slider("Choisissez la valeur du pH : ", 1.0, 7.0, 4.6, step=0.1)
+
+    if aw < 0.88:
+        q8 = "NF"
+    elif aw < 0.9:
+        q8 = "NF"
+    elif aw < 0.92:
+        q8 = "NF"
+    elif aw < 0.96:
+        q8 = "NF"
+    elif aw < 1.0:
+        q8 = "NF"
     else:
-        st.write(questions[st.session_state.current_question])
-        if st.session_state.current_question in ["q8", "q9"]:
-            st.session_state.ph = st.number_input("pH:", step=0.1, format="%.1f")
-            st.session_state.aw = st.number_input("Aw:", step=0.01, format="%.2f")
-            if st.button("Vérifier"):
-                st.session_state.growth_factor = check_growth_factors(st.session_state.ph, st.session_state.aw)
-                st.write(f"Facteur de croissance: {st.session_state.growth_factor}")
-                handle_answer(st.session_state.growth_factor)
-        else:
-            if st.button("Oui"):
-                handle_answer("Oui")
-            if st.button("Non"):
-                handle_answer("Non")
+        q8 = "NF"
 
-def handle_answer(answer):
-    current_question = st.session_state.current_question
-    if current_question == "q1":
-        if answer == "Oui":
-            st.session_state.result = "Étiquetage selon réglementation en vigueur"
-        else:
-            st.session_state.current_question = "q2"
-    elif current_question == "q2":
-        if answer == "Oui":
-            st.session_state.result = "DDM"
-        else:
-            st.session_state.current_question = "q3"
-    elif current_question == "q3":
-        if answer == "Oui":
-            st.session_state.current_question = "q5a"
-        else:
-            st.session_state.current_question = "q4"
-    elif current_question == "q4":
-        if answer == "Oui":
-            st.session_state.current_question = "q5b"
-        else:
-            st.session_state.result = "DLC"
-    elif current_question in ["q5a", "q5b"]:
-        if answer == "Oui":
-            st.session_state.current_question = "q6"
-        else:
-            st.session_state.current_question = "q7"
-    elif current_question == "q6":
-        if answer == "Oui":
-            st.session_state.current_question = "q7"
-        else:
-            st.session_state.result = "DLC"
-    elif current_question == "q7":
-        if answer == "Oui":
-            st.session_state.current_question = "q8"
-        else:
-            st.session_state.result = "DLC"
-    elif current_question == "q8":
-        if answer == "F":
-            st.session_state.result = "DLC"
-        else:
-            st.session_state.current_question = "q9"
-    elif current_question == "q9":
-        if answer in ["F", "T"]:
-            st.session_state.current_question = "q10"
-        else:
-            st.session_state.current_question = "finalQuestion"
-    elif current_question == "q10":
-        if answer == "Oui":
-            st.session_state.current_question = "finalQuestion"
-        else:
-            st.session_state.result = "DLC"
-    elif current_question == "finalQuestion":
-        st.session_state.result = "DDM" if answer == "Oui" else "DLC"
+    if ph < 4.6:
+        q8 = "NF"
+    elif ph < 5.6:
+        q8 = "NF"
+    else:
+        q8 = "F"
+
+    st.write(f"a<sub>w</sub> : {aw} | pH : {ph} | Favorise la croissance : {q8}")
+
+    # Croissance et production de toxines
+    st.markdown("---")
+    st.subheader("9. Croissance et production de toxines:")
+    st.write("Pour répondre, consultez le tableau suivant :")
+    st.write("T : Favorise la production de toxines | NT : Ne pas soutenir la production de toxines")
+
+    aw = st.slider("Choisissez la valeur de l'activité de l'eau (aw) : ", 0.0, 1.0, 0.92, step=0.01)
+    ph = st.slider("Choisissez la valeur du pH : ", 4.0, 7.0, 5.6, step=0.1)
+
+    if aw < 0.92:
+        q9 = "NT"
+    elif aw < 0.95:
+        q9 = "NT"
+    else:
+        q9 = "T"
+
+    if ph < 4.6:
+        q9 = "NT"
+    elif ph < 5.6:
+        q9 = "NT"
+    else:
+        q9 = "T"
+
+    st.write(f"a<sub>w</sub> : {aw} | pH : {ph} | Favorise la production de toxines : {q9}")
+
+    # Capacité à démontrer une approche par étapes
+    st.markdown("---")
+    st.subheader("10. Capacité à démontrer une approche par étapes:")
+    q10 = st.radio("Q10 : L'opérateur est-il en mesure de démontrer (approche par étapes décrite à la section 3.4) que le produit alimentaire ne favorise pas la croissance et/ou la production de toxines de bactéries pathogènes dans des conditions de température raisonnablement prévisibles pendant la distribution ?", ["Oui", "Non"])
+
+    # Conclusion
+    st.markdown("---")
+    st.subheader("Conclusion:")
+    if q10 == "Oui":
+        st.success("Le produit alimentaire peut être étiqueté avec une DLC.")
+    else:
+        st.success("Le produit alimentaire peut être étiqueté avec une DDM.")
+        st.write("**Pas de croissance ni de production de toxines de bactéries pathogènes pendant la durée de conservation.** Le produit alimentaire peut être conservé à température ambiante sauf si des raisons de qualité exigent une réfrigération.")
 
 if __name__ == "__main__":
     main()
