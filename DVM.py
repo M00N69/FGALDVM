@@ -9,12 +9,62 @@ def save_decision(data):
     df.to_csv('decisions.csv', mode='a', index=False, header=False)
 
 def main():
-    # ... (code du design et des styles)
+    st.set_page_config(page_title="Détermination DLC ou DDM", layout="wide")
+    st.title("Détermination DLC ou DDM")
+    st.markdown(
+        """
+        <style>
+        .stApp {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.5;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+
+        .stTitle {
+            color: #007bff;
+            font-size: 2.5em;
+            margin-bottom: 1em;
+            text-align: center;
+        }
+
+        .stButton {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 1em;
+        }
+
+        .stButton:hover {
+            background-color: #0056b3;
+        }
+
+        .stFileUpload {
+            margin-bottom: 1em;
+        }
+
+        .stRadio {
+            margin-bottom: 0.5em;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
     decisions = []
     current_step = 1
 
-    # ... (fonction display_dgal_info)
+    # Fonction pour afficher les informations détaillées de la note DGAL après chaque réponse
+    def display_dgal_info(step):
+        st.markdown(f"""
+        **Informations de la note DGAL pour l'étape {step}** :
+        - **Règlement (UE) n° 1169/2011** : concerne l'information des consommateurs sur les denrées alimentaires.
+        - **Critères microbiologiques** : basés sur le règlement (CE) n° 2073/2005 concernant les critères microbiologiques applicables aux denrées alimentaires.
+        - **Études de vieillissement** : recommandées pour valider la durée de vie microbiologique des produits.
+        """)
 
     # Arbre de décision
     tree = {
@@ -118,14 +168,14 @@ def main():
     if current_step == 1:
         q1 = display_question("Q1 : Le produit alimentaire est-il exempt de la DLC conformément au règlement (UE) n° 1169/2011 ou est-il couvert par d'autres dispositions de l'Union imposant d'autres types de marquage de la date ?", ["Oui", "Non"], "q1")
         if q1 == "Oui":
-            st.success(f"Décision : {current_node[q1]['Décision']}")
+            st.success(f"Décision : {current_node[q1]['Décision']}")  # Accès direct au dictionnaire
             st.write(f"Explication : {current_node[q1]['Explication']}")
             display_dgal_info(current_step)
             decisions.append({"Question": "Q1", "Réponse": q1, "Décision": current_node[q1]['Décision']})
             current_step = 10 # Fin de l'arbre
         else:
             decision_path.append(("Q1", q1))
-            current_node = current_node[q1]  # Pas besoin de changer current_node ici
+            current_node = current_node[q1]
             current_step += 1
 
     # Question 2
