@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import os
 
 # Fonction pour sauvegarder les décisions
 def save_decision(data):
@@ -7,6 +8,7 @@ def save_decision(data):
     df.to_csv('decisions.csv', mode='a', index=False, header=False)
 
 def main():
+    st.set_page_config(page_title="Détermination DLC ou DDM", layout="centered")
     st.title("Détermination DLC ou DDM")
 
     st.markdown("""
@@ -17,16 +19,37 @@ def main():
 
     decisions = []
 
+    # Fonction pour afficher les informations détaillées de la note DGAL après chaque réponse
+    def display_dgal_info(step):
+        st.markdown(f"""
+        **Informations de la note DGAL pour l'étape {step}** :
+        - **Règlement (UE) n° 1169/2011** : concerne l'information des consommateurs sur les denrées alimentaires.
+        - **Critères microbiologiques** : basés sur le règlement (CE) n° 2073/2005 concernant les critères microbiologiques applicables aux denrées alimentaires.
+        - **Études de vieillissement** : recommandées pour valider la durée de vie microbiologique des produits.
+        """)
+
     # Question 1
     st.markdown("""
     **Q1 : Le produit alimentaire est-il exempt de la DLC conformément au règlement (UE) n° 1169/2011 ou est-il couvert par d'autres dispositions de l'Union imposant d'autres types de marquage de la date ?**
     """)
     q1 = st.radio("", ("Oui", "Non"), key="q1")
-    
     if q1 == "Oui":
         st.success("Étiquetage selon réglementation en vigueur")
+        display_dgal_info("Q1")
         decisions.append({"Question": "Q1", "Réponse": q1, "Décision": "Étiquetage selon réglementation en vigueur"})
     else:
+        # Justification et upload de documents
+        justification_q1 = st.text_area("Justifiez votre réponse (Q1)", key="justification_q1")
+        doc_q1 = st.file_uploader("Téléchargez un document justificatif (Q1)", key="doc_q1")
+        
+        if doc_q1:
+            doc_q1_name = doc_q1.name
+            with open(os.path.join("uploads", doc_q1_name), "wb") as f:
+                f.write(doc_q1.getbuffer())
+            decisions.append({"Question": "Q1", "Justification": justification_q1, "Document": doc_q1_name})
+        else:
+            decisions.append({"Question": "Q1", "Justification": justification_q1})
+
         # Question 2
         st.markdown("""
         **Q2 : Le produit alimentaire est-il congelé ?**
@@ -56,15 +79,19 @@ def main():
                     
                     if q6 == "Oui":
                         st.success("DDM")
+                        display_dgal_info("Q6")
                         decisions.append({"Question": "Q6", "Réponse": q6, "Décision": "DDM"})
                     else:
                         st.error("DLC")
+                        display_dgal_info("Q6")
                         decisions.append({"Question": "Q6", "Réponse": q6, "Décision": "DLC"})
                 else:
                     st.success("DDM")
+                    display_dgal_info("Q5a")
                     decisions.append({"Question": "Q5a", "Réponse": q5a, "Décision": "DDM"})
             else:
                 st.error("DLC")
+                display_dgal_info("Q3")
                 decisions.append({"Question": "Q3", "Réponse": q3, "Décision": "DLC"})
         else:
             # Question 4
@@ -89,12 +116,15 @@ def main():
                     
                     if q6 == "Oui":
                         st.success("DDM")
+                        display_dgal_info("Q6")
                         decisions.append({"Question": "Q6", "Réponse": q6, "Décision": "DDM"})
                     else:
                         st.error("DLC")
+                        display_dgal_info("Q6")
                         decisions.append({"Question": "Q6", "Réponse": q6, "Décision": "DLC"})
                 else:
                     st.success("DDM")
+                    display_dgal_info("Q5b")
                     decisions.append({"Question": "Q5b", "Réponse": q5b, "Décision": "DDM"})
             else:
                 # Question 7
@@ -105,6 +135,7 @@ def main():
                 
                 if q7 == "Oui":
                     st.success("DDM")
+                    display_dgal_info("Q7")
                     decisions.append({"Question": "Q7", "Réponse": q7, "Décision": "DDM"})
                 else:
                     # Question 8
@@ -119,6 +150,7 @@ def main():
                         # Ajouter toutes les combinaisons qui ne favorisent pas la croissance
                     ]:
                         st.success("DDM")
+                        display_dgal_info("Q8")
                         decisions.append({"Question": "Q8", "Réponse": f"aw: {aw}, pH: {ph}", "Décision": "DDM"})
                     else:
                         # Question 9
@@ -132,9 +164,11 @@ def main():
                             # Ajouter toutes les combinaisons qui ne favorisent pas la production de toxines
                         ]:
                             st.success("DDM")
+                            display_dgal_info("Q9")
                             decisions.append({"Question": "Q9", "Réponse": f"aw: {aw2}, pH: {ph2}", "Décision": "DDM"})
                         else:
                             st.error("DLC")
+                            display_dgal_info("Q9")
                             decisions.append({"Question": "Q9", "Réponse": f"aw: {aw2}, pH: {ph2}", "Décision": "DLC"})
     
     if st.button("Sauvegarder les décisions", key="save_button"):
@@ -142,4 +176,6 @@ def main():
         st.success("Décisions sauvegardées avec succès")
 
 if __name__ == "__main__":
+    if not os.path.exists("uploads"):
+        os.makedirs("uploads")
     main()
