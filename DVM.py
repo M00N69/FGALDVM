@@ -380,26 +380,30 @@ def main():
     if current_step == 1:
         q1 = display_question("Q1 : Le produit alimentaire est-il exempt de la DLC conformément au règlement (UE) n° 1169/2011 ou est-il couvert par d'autres dispositions de l'Union imposant d'autres types de marquage de la date ?", ["Oui", "Non"], "q1")
         decision_path.append(("Q1", q1))
-        if q1 == "Oui":
+        if q1 in current_node: # Vérification de la présence de la clé
             current_node = current_node[q1]
             current_step += 1
         else:
-            current_node = current_node[q1]
-            current_step += 1
+            st.error("Erreur dans l'arbre de décision.")
+            current_step = 11 # Fin de l'arbre
 
     # Question 2
     if current_step == 2:
         q2 = display_question("Q2 : Le produit alimentaire est-il congelé ?", ["Oui", "Non"], "q2")
         decision_path.append(("Q2", q2))
-        current_node = current_node[q2]
-        current_step += 1
+        if q2 in current_node:
+            current_node = current_node[q2]
+            current_step += 1
+        else:
+            st.error("Erreur dans l'arbre de décision.")
+            current_step = 11 # Fin de l'arbre
 
     # Question 3
     if current_step == 3:
         q3 = display_question("Q3 : Le produit alimentaire subit-il un traitement assainissant validé éliminant toutes les spores des bactéries pathogènes ?", ["Oui", "Non"], "q3")
         decision_path.append(("Q3", q3))
-        current_node = current_node[q3]
-        if q3 == "Oui":
+        if q3 in current_node:
+            current_node = current_node[q3]
             current_step += 1
         else:
             final_decision = current_node['Décision']
@@ -410,8 +414,8 @@ def main():
     if current_step == 4:
         q4 = display_question("Q4 : Le produit alimentaire est-il soumis à un traitement assainissant validé éliminant toutes les cellules végétatives des bactéries pathogènes d'origine alimentaire ?", ["Oui", "Non"], "q4")
         decision_path.append(("Q4", q4))
-        current_node = current_node[q4]
-        if q4 == "Oui":
+        if q4 in current_node:
+            current_node = current_node[q4]
             current_step += 1
         else:
             current_step += 2
@@ -420,8 +424,8 @@ def main():
     if current_step == 5:
         q5a = display_question("Q5a : Existe-t-il un risque de recontamination du produit alimentaire avant l'emballage ?", ["Oui", "Non"], "q5a")
         decision_path.append(("Q5a", q5a))
-        current_node = current_node[q5a]
-        if q5a == "Oui":
+        if q5a in current_node:
+            current_node = current_node[q5a]
             current_step += 1
         else:
             final_decision = current_node['Décision']
@@ -432,8 +436,8 @@ def main():
     if current_step == 6:
         q5b = display_question("Q5b : Y a-t-il un risque de recontamination du produit alimentaire avant son emballage ?", ["Oui", "Non"], "q5b")
         decision_path.append(("Q5b", q5b))
-        current_node = current_node[q5b]
-        if q5b == "Oui":
+        if q5b in current_node:
+            current_node = current_node[q5b]
             current_step += 1
         else:
             final_decision = current_node['Décision']
@@ -444,11 +448,9 @@ def main():
     if current_step == 7:
         q6 = display_question("Q6 : Le produit alimentaire subit-il un second traitement assainissant validé éliminant toutes les cellules végétatives des bactéries pathogènes d'origine ?", ["Oui", "Non"], "q6")
         decision_path.append(("Q6", q6))
-        current_node = current_node[q6]
-        if q6 == "Oui":
-            final_decision = current_node['Décision']
-            final_explanation = current_node['Explication']
-            current_step = 10
+        if q6 in current_node:
+            current_node = current_node[q6]
+            current_step += 1
         else:
             final_decision = current_node['Décision']
             final_explanation = current_node['Explication']
@@ -458,11 +460,9 @@ def main():
     if current_step == 8:
         q7 = display_question("Q7 : Le traitement assainissant est-il appliqué à des produits emballés ou suivi d'un emballage aseptique ?", ["Oui", "Non"], "q7")
         decision_path.append(("Q7", q7))
-        current_node = current_node[q7]
-        if q7 == "Oui":
-            final_decision = current_node['Décision']
-            final_explanation = current_node['Explication']
-            current_step = 10
+        if q7 in current_node:
+            current_node = current_node[q7]
+            current_step += 1
         else:
             current_step += 1
 
