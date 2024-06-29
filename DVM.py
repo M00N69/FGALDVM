@@ -56,8 +56,8 @@ def main():
 
     decisions = []
     current_step = 1
-    final_decision = None  # Initialisation de la variable de décision finale
-    final_explanation = None  # Initialisation de la variable d'explication finale
+    final_decision = None  
+    final_explanation = None  
 
     # Fonction pour afficher les informations détaillées de la note DGAL après chaque réponse
     def display_dgal_info(step):
