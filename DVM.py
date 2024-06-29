@@ -54,7 +54,7 @@ def main():
     )
 
     decisions = []
-    current_step = 1
+    current_step = "Q1"
     final_decision = None
     final_explanation = None
 
@@ -161,78 +161,134 @@ def main():
         }
     }
 
-    # Navigation dans l'arbre de décision
-    current_node = tree["Q1"]
     decision_path = []
     justifications = {}
     uploaded_files = {}
 
     # Fonction pour afficher les questions et les réponses
-    def display_question(question, options, key):
+    def display_question(step, question, options):
         st.markdown(f"## **{question}**")
-        answer = st.radio("", options, key=key)
-        return answer
+        return st.radio("", options, key=step)
 
-    # Fonction pour gérer les étapes de l'arbre de décision
-    def next_step(node, answer):
-        if answer in node:
-            return node[answer]
-        else:
-            st.error("Erreur dans l'arbre de décision.")
-            return None
+    while True:
+        if current_step in ["Q1", "Q2", "Q3", "Q4", "Q5a", "Q5b", "Q6", "Q7", "Q8", "Q9"]:
+            if current_step == "Q1":
+                answer = display_question(current_step, "Le produit alimentaire est-il exempt de la DLC conformément au règlement (UE) n° 1169/2011 ou est-il couvert par d'autres dispositions de l'Union imposant d'autres types de marquage de la date ?", ["Oui", "Non"])
+                justification = st.text_area("Justifiez votre réponse (Q1)", key="justification_q1")
+                justifications["Q1"] = justification
 
-    # Processus de l'arbre de décision
-    while current_step < 11:
-        if "Décision" in current_node:
-            final_decision = current_node["Décision"]
-            final_explanation = current_node["Explication"]
-            break
-        else:
-            if current_step == 1:
-                question = "Q1 : Le produit alimentaire est-il exempt de la DLC conformément au règlement (UE) n° 1169/2011 ou est-il couvert par d'autres dispositions de l'Union imposant d'autres types de marquage de la date ?"
-                key = "q1"
-            elif current_step == 2:
-                question = "Q2 : Le produit alimentaire est-il congelé ?"
-                key = "q2"
-            elif current_step == 3:
-                question = "Q3 : Le produit alimentaire subit-il un traitement assainissant validé éliminant toutes les spores des bactéries pathogènes ?"
-                key = "q3"
-            elif current_step == 4:
-                question = "Q4 : Le produit alimentaire est-il soumis à un traitement assainissant validé éliminant toutes les cellules végétatives des bactéries pathogènes d'origine alimentaire ?"
-                key = "q4"
-            elif current_step == 5:
-                question = "Q5a : Existe-t-il un risque de recontamination du produit alimentaire avant l'emballage ?"
-                key = "q5a"
-            elif current_step == 6:
-                question = "Q5b : Y a-t-il un risque de recontamination du produit alimentaire avant son emballage ?"
-                key = "q5b"
-            elif current_step == 7:
-                question = "Q6 : Le produit alimentaire subit-il un second traitement assainissant validé éliminant toutes les cellules végétatives des bactéries pathogènes d'origine ?"
-                key = "q6"
-            elif current_step == 8:
-                question = "Q7 : Le traitement assainissant est-il appliqué à des produits emballés ou suivi d'un emballage aseptique ?"
-                key = "q7"
-            elif current_step == 9:
-                question = "Q8 : Le produit alimentaire favorise-t-il la croissance des bactéries ?"
-                key = "q8"
-            elif current_step == 10:
-                question = "Q9 : Le produit alimentaire favorise-t-il la germination, la croissance et la production de toxines ?"
-                key = "q9"
+            if current_step == "Q2":
+                answer = display_question(current_step, "Le produit alimentaire est-il congelé ?", ["Oui", "Non"])
+                justification = st.text_area("Justifiez votre réponse (Q2)", key="justification_q2")
+                doc = st.file_uploader("Téléchargez un document justificatif (Q2)", key="doc_q2", type=["pdf", "jpg", "png"])
+                if doc:
+                    doc_name = doc.name
+                    with open(os.path.join("uploads", doc_name), "wb") as f:
+                        f.write(doc.getbuffer())
+                    uploaded_files["Q2"] = doc_name
+                justifications["Q2"] = justification
 
-            answer = display_question(question, ["Oui", "Non"], key)
-            current_node = next_step(current_node, answer)
-            if current_node is None:
+            if current_step == "Q3":
+                answer = display_question(current_step, "Le produit alimentaire subit-il un traitement assainissant validé éliminant toutes les spores des bactéries pathogènes ?", ["Oui", "Non"])
+                justification = st.text_area("Justifiez votre réponse (Q3)", key="justification_q3")
+                doc = st.file_uploader("Téléchargez un document justificatif (Q3)", key="doc_q3", type=["pdf", "jpg", "png"])
+                if doc:
+                    doc_name = doc.name
+                    with open(os.path.join("uploads", doc_name), "wb") as f:
+                        f.write(doc.getbuffer())
+                    uploaded_files["Q3"] = doc_name
+                justifications["Q3"] = justification
+
+            if current_step == "Q4":
+                answer = display_question(current_step, "Le produit alimentaire est-il soumis à un traitement assainissant validé éliminant toutes les cellules végétatives des bactéries pathogènes d'origine alimentaire ?", ["Oui", "Non"])
+                justification = st.text_area("Justifiez votre réponse (Q4)", key="justification_q4")
+                doc = st.file_uploader("Téléchargez un document justificatif (Q4)", key="doc_q4", type=["pdf", "jpg", "png"])
+                if doc:
+                    doc_name = doc.name
+                    with open(os.path.join("uploads", doc_name), "wb") as f:
+                        f.write(doc.getbuffer())
+                    uploaded_files["Q4"] = doc_name
+                justifications["Q4"] = justification
+
+            if current_step == "Q5a":
+                answer = display_question(current_step, "Existe-t-il un risque de recontamination du produit alimentaire avant l'emballage ?", ["Oui", "Non"])
+                justification = st.text_area("Justifiez votre réponse (Q5a)", key="justification_q5a")
+                doc = st.file_uploader("Téléchargez un document justificatif (Q5a)", key="doc_q5a", type=["pdf", "jpg", "png"])
+                if doc:
+                    doc_name = doc.name
+                    with open(os.path.join("uploads", doc_name), "wb") as f:
+                        f.write(doc.getbuffer())
+                    uploaded_files["Q5a"] = doc_name
+                justifications["Q5a"] = justification
+
+            if current_step == "Q5b":
+                answer = display_question(current_step, "Y a-t-il un risque de recontamination du produit alimentaire avant son emballage ?", ["Oui", "Non"])
+                justification = st.text_area("Justifiez votre réponse (Q5b)", key="justification_q5b")
+                doc = st.file_uploader("Téléchargez un document justificatif (Q5b)", key="doc_q5b", type=["pdf", "jpg", "png"])
+                if doc:
+                    doc_name = doc.name
+                    with open(os.path.join("uploads", doc_name), "wb") as f:
+                        f.write(doc.getbuffer())
+                    uploaded_files["Q5b"] = doc_name
+                justifications["Q5b"] = justification
+
+            if current_step == "Q6":
+                answer = display_question(current_step, "Le produit alimentaire subit-il un second traitement assainissant validé éliminant toutes les cellules végétatives des bactéries pathogènes d'origine ?", ["Oui", "Non"])
+                justification = st.text_area("Justifiez votre réponse (Q6)", key="justification_q6")
+                doc = st.file_uploader("Téléchargez un document justificatif (Q6)", key="doc_q6", type=["pdf", "jpg", "png"])
+                if doc:
+                    doc_name = doc.name
+                    with open(os.path.join("uploads", doc_name), "wb") as f:
+                        f.write(doc.getbuffer())
+                    uploaded_files["Q6"] = doc_name
+                justifications["Q6"] = justification
+
+            if current_step == "Q7":
+                answer = display_question(current_step, "Le traitement assainissant est-il appliqué à des produits emballés ou suivi d'un emballage aseptique ?", ["Oui", "Non"])
+                justification = st.text_area("Justifiez votre réponse (Q7)", key="justification_q7")
+                doc = st.file_uploader("Téléchargez un document justificatif (Q7)", key="doc_q7", type=["pdf", "jpg", "png"])
+                if doc:
+                    doc_name = doc.name
+                    with open(os.path.join("uploads", doc_name), "wb") as f:
+                        f.write(doc.getbuffer())
+                    uploaded_files["Q7"] = doc_name
+                justifications["Q7"] = justification
+
+            if current_step == "Q8":
+                st.markdown("## **Q8 : Le produit alimentaire favorise-t-il la croissance des bactéries ?**")
+                aw = st.selectbox("aw", ["<0,88", "0,88 à 0,9", ">0,9 à 0,92", "0,92 à 0,96", ">0,96"], key="aw")
+                ph = st.selectbox("pH", ["1,9 à 4,0", "4,0 à 4,2", "4,2 à 4,4", "4,4 à 5", ">5"], key="ph")
+                answer = (aw, ph)
+                justification = st.text_area("Justifiez votre réponse (Q8)", key="justification_q8")
+                doc = st.file_uploader("Téléchargez un document justificatif (Q8)", key="doc_q8", type=["pdf", "jpg", "png"])
+                if doc:
+                    doc_name = doc.name
+                    with open(os.path.join("uploads", doc_name), "wb") as f:
+                        f.write(doc.getbuffer())
+                    uploaded_files["Q8"] = doc_name
+                justifications["Q8"] = justification
+
+            if current_step == "Q9":
+                st.markdown("## **Q9 : Le produit alimentaire favorise-t-il la germination, la croissance et la production de toxines ?**")
+                aw2 = st.selectbox("aw2", ["<0,92", "0,92 à 0,95", ">0,95"], key="aw2")
+                ph2 = st.selectbox("pH2", ["<4,6", "4,6-5,6", ">5,6"], key="ph2")
+                answer = (aw2, ph2)
+                justification = st.text_area("Justifiez votre réponse (Q9)", key="justification_q9")
+                doc = st.file_uploader("Téléchargez un document justificatif (Q9)", key="doc_q9", type=["pdf", "jpg", "png"])
+                if doc:
+                    doc_name = doc.name
+                    with open(os.path.join("uploads", doc_name), "wb") as f:
+                        f.write(doc.getbuffer())
+                    uploaded_files["Q9"] = doc_name
+                justifications["Q9"] = justification
+
+            decision_path.append((current_step, answer))
+            if "Décision" in tree[current_step][answer]:
+                final_decision = tree[current_step][answer]["Décision"]
+                final_explanation = tree[current_step][answer]["Explication"]
                 break
-            decision_path.append((question, answer))
-            justification = st.text_area(f"Justifiez votre réponse ({key})", key=f"justification_{key}")
-            doc = st.file_uploader(f"Téléchargez un document justificatif ({key})", key=f"doc_{key}", type=["pdf", "jpg", "png"])
-            if doc:
-                doc_name = doc.name
-                with open(os.path.join("uploads", doc_name), "wb") as f:
-                    f.write(doc.getbuffer())
-                uploaded_files[key] = doc_name
-            justifications[key] = justification
-            current_step += 1
+            else:
+                current_step = list(tree[current_step][answer].keys())[0]
 
     # Affichage de la décision finale
     if final_decision:
