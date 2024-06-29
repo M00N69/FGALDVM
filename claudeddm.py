@@ -5,6 +5,8 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 from io import BytesIO
 import base64
+import requests
+from PIL import Image
 
 # Définition des questions et explications
 questions = {
@@ -176,8 +178,14 @@ def handle_answer(answer):
     st.experimental_rerun()
 
 def main():
-    # Ajouter la bannière Visipilot
-    st.image("visipilot_banner.PNG", use_column_width=True)
+    # Ajouter la bannière Visipilot depuis l'URL
+    image_url = "https://github.com/M00N69/Gemini-Knowledge/raw/66b27ed1f1e8272721529f7b15cbf0fe4b135d98/visipilot%20banner.PNG"
+    try:
+        response = requests.get(image_url)
+        image = Image.open(BytesIO(response.content))
+        st.image(image, use_column_width=True)
+    except Exception as e:
+        st.error(f"Erreur lors du chargement de l'image : {e}")
 
     st.title("Arbre de décision EFSA : DLC ou DDM")
     st.write("Cet outil vous guide à travers l'arbre de décision EFSA pour déterminer si votre produit alimentaire nécessite une Date Limite de Consommation (DLC) ou une Date de Durabilité Minimale (DDM).")
