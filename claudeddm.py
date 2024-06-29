@@ -23,7 +23,16 @@ questions = {
 tooltips = {
     'q1': "Cette question vise à identifier si le produit est soumis à des réglementations spécifiques concernant l'étiquetage des dates.",
     'q2': "Les produits congelés ont des considérations spéciales en termes de durée de conservation.",
-    # ... (ajoutez des explications pour chaque question)
+    'q3': "Un traitement assainissant qui élimine toutes les spores bactériennes pathogènes est un processus très intensif.",
+    'q4': "Ce traitement élimine les cellules bactériennes vivantes, mais pas nécessairement les spores.",
+    'q5a': "La recontamination peut se produire si le produit est exposé à l'environnement après le traitement.",
+    'q5b': "Similaire à q5a, mais dans le contexte d'un produit qui n'a pas subi de traitement éliminant toutes les spores.",
+    'q6': "Un second traitement peut être nécessaire si une recontamination s'est produite.",
+    'q7': "L'emballage aseptique aide à prévenir la recontamination après le traitement.",
+    'q8': "Certains aliments fournissent un environnement propice à la croissance bactérienne.",
+    'q9': "Certains aliments peuvent favoriser non seulement la croissance, mais aussi la production de toxines.",
+    'q10': "Cette démonstration nécessite généralement des tests et des analyses approfondis.",
+    'finalQuestion': "Cette question finale détermine si le produit peut être conservé à température ambiante ou s'il nécessite une réfrigération."
 }
 
 def check_growth_factors(ph, aw):
