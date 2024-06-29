@@ -25,7 +25,7 @@ def main():
         q3 = st.radio("Q3 : Le produit alimentaire subit-il un traitement assainissant valide éliminant toutes les spores des bactéries pathogènes ?", ["Oui", "Non"])
 
         # Risque de recontamination
-        if (q2 == "Non" and q3 == "Oui") or (q2 == "Non" and q3 == "Non"):
+        if q2 == "Non" and (q3 == "Oui" or q3 == "Non"):
             st.markdown("---")
             st.subheader("4. Risque de recontamination:")
             q4 = st.radio("Q4 : Le produit alimentaire est-il soumis à un traitement assainissant valide éliminant toutes les cellules végétatives des bactéries pathogènes d'origine alimentaire ?", ["Oui", "Non"])
