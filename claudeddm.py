@@ -147,20 +147,35 @@ def handle_answer(answer):
         else:
             st.session_state.current_question = 'q2'
     elif st.session_state.current_question == 'q2':
-        st.session_state.result = 'DDM' if answer == 'Oui' else 'q3'
+        if answer == 'Oui':
+            st.session_state.current_question = 'q4'
+        else:
+            st.session_state.current_question = 'q3'
     elif st.session_state.current_question == 'q3':
-        st.session_state.current_question = 'q5a' if answer == 'Oui' else 'q4'
+        if answer == 'Oui':
+            st.session_state.current_question = 'q5a'
+        else:
+            st.session_state.current_question = 'q4'
     elif st.session_state.current_question == 'q4':
         if answer == 'Oui':
             st.session_state.current_question = 'q5b'
         else:
             st.session_state.result = 'DLC'
     elif st.session_state.current_question in ['q5a', 'q5b']:
-        st.session_state.current_question = 'q6' if answer == 'Oui' else 'q7'
+        if answer == 'Oui':
+            st.session_state.current_question = 'q6'
+        else:
+            st.session_state.current_question = 'q7'
     elif st.session_state.current_question == 'q6':
-        st.session_state.current_question = 'q7' if answer == 'Oui' else 'DLC'
+        if answer == 'Oui':
+            st.session_state.current_question = 'q7'
+        else:
+            st.session_state.result = 'DLC'
     elif st.session_state.current_question == 'q7':
-        st.session_state.current_question = 'q8' if answer == 'Oui' else 'DLC'
+        if answer == 'Oui':
+            st.session_state.current_question = 'q8'
+        else:
+            st.session_state.result = 'DLC'
     elif st.session_state.current_question == 'q8':
         if answer == 'F':
             st.session_state.result = 'DLC'
@@ -172,7 +187,10 @@ def handle_answer(answer):
         else:
             st.session_state.current_question = 'finalQuestion'
     elif st.session_state.current_question == 'q10':
-        st.session_state.result = 'DDM' if answer == 'Oui' else 'DLC'
+        if answer == 'Oui':
+            st.session_state.current_question = 'finalQuestion'
+        else:
+            st.session_state.result = 'DLC'
     elif st.session_state.current_question == 'finalQuestion':
         st.session_state.result = 'DDM' if answer == 'Oui' else 'DLC'
 
