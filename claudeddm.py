@@ -147,50 +147,26 @@ def handle_answer(answer):
         else:
             st.session_state.current_question = 'q2'
     elif st.session_state.current_question == 'q2':
-        if answer == 'Oui':
-            st.session_state.current_question = 'q4'
-        else:
-            st.session_state.current_question = 'q3'
+        st.session_state.current_question = 'q4' if answer == 'Oui' else 'q3'
     elif st.session_state.current_question == 'q3':
-        if answer == 'Oui':
-            st.session_state.current_question = 'q5a'
-        else:
-            st.session_state.current_question = 'q4'
+        st.session_state.current_question = 'q5a' if answer == 'Oui' else 'q4'
     elif st.session_state.current_question == 'q4':
         if answer == 'Oui':
             st.session_state.current_question = 'q5b'
         else:
             st.session_state.result = 'DLC'
     elif st.session_state.current_question in ['q5a', 'q5b']:
-        if answer == 'Oui':
-            st.session_state.current_question = 'q6'
-        else:
-            st.session_state.current_question = 'q7'
+        st.session_state.current_question = 'q6' if answer == 'Oui' else 'q7'
     elif st.session_state.current_question == 'q6':
-        if answer == 'Oui':
-            st.session_state.current_question = 'q7'
-        else:
-            st.session_state.result = 'DLC'
+        st.session_state.current_question = 'q7' if answer == 'Oui' else 'DLC'
     elif st.session_state.current_question == 'q7':
-        if answer == 'Oui':
-            st.session_state.current_question = 'q8'
-        else:
-            st.session_state.result = 'DLC'
+        st.session_state.current_question = 'q8' if answer == 'Oui' else 'DLC'
     elif st.session_state.current_question == 'q8':
-        if answer == 'F':
-            st.session_state.result = 'DLC'
-        else:
-            st.session_state.current_question = 'q9'
+        st.session_state.current_question = 'q9' if answer == 'Oui' else 'DLC'
     elif st.session_state.current_question == 'q9':
-        if answer in ['F', 'T']:
-            st.session_state.current_question = 'q10'
-        else:
-            st.session_state.current_question = 'finalQuestion'
+        st.session_state.current_question = 'q10' if answer == 'Oui' else 'finalQuestion'
     elif st.session_state.current_question == 'q10':
-        if answer == 'Oui':
-            st.session_state.current_question = 'finalQuestion'
-        else:
-            st.session_state.result = 'DLC'
+        st.session_state.result = 'DDM' if answer == 'Oui' else 'DLC'
     elif st.session_state.current_question == 'finalQuestion':
         st.session_state.result = 'DDM' if answer == 'Oui' else 'DLC'
 
@@ -227,16 +203,7 @@ def main():
                 factor = check_growth_factors(ph, aw)
                 st.session_state.history.append((st.session_state.current_question, f"pH: {ph}, Aw: {aw}, Résultat: {factor}"))
                 st.write(get_growth_factor_explanation(factor))
-                if st.session_state.current_question == 'q8':
-                    if factor == 'F':
-                        st.session_state.result = 'DLC'
-                    else:
-                        st.session_state.current_question = 'q9'
-                elif st.session_state.current_question == 'q9':
-                    if factor in ['F', 'T']:
-                        st.session_state.current_question = 'q10'
-                    else:
-                        st.session_state.current_question = 'finalQuestion'
+                handle_answer(factor)
         else:
             col1, col2 = st.columns(2)
             with col1:
@@ -266,4 +233,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
