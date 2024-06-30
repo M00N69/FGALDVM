@@ -158,9 +158,15 @@ def handle_answer(answer):
     elif st.session_state.current_question in ['q5a', 'q5b']:
         st.session_state.current_question = 'q6' if answer == 'Oui' else 'q7'
     elif st.session_state.current_question == 'q6':
-        st.session_state.current_question = 'q7' if answer == 'Oui' else 'DLC'
+        if answer == 'Oui':
+            st.session_state.current_question = 'q7'
+        else:
+            st.session_state.result = 'DLC'
     elif st.session_state.current_question == 'q7':
-        st.session_state.current_question = 'q8' if answer == 'Oui' else 'DLC'
+        if answer == 'Oui':
+            st.session_state.current_question = 'q8'
+        else:
+            st.session_state.result = 'DLC'
     elif st.session_state.current_question == 'q8':
         if answer == 'F':
             st.session_state.result = 'DLC'
@@ -203,9 +209,9 @@ def main():
             if st.session_state.current_question in ['q8', 'q9']:
                 col1, col2 = st.columns(2)
                 with col1:
-                    ph = st.number_input("pH:", min_value=0.0, max_value=14.0, step=0.1)
+                    ph = st.number_input("pH:", min_value=0.0, max_value=14.0, step=0.1, key='ph')
                 with col2:
-                    aw = st.number_input("Aw:", min_value=0.0, max_value=1.0, step=0.01)
+                    aw = st.number_input("Aw:", min_value=0.0, max_value=1.0, step=0.01, key='aw')
                 if st.button("Vérifier"):
                     factor = check_growth_factors(ph, aw)
                     st.session_state.history.append((st.session_state.current_question, f"pH: {ph}, Aw: {aw}, Résultat: {factor}"))
@@ -241,6 +247,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
