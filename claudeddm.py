@@ -196,33 +196,35 @@ def main():
 
     if st.session_state.result is None:
         current_q = st.session_state.current_question
-        st.subheader(questions[current_q]['question'])
-        st.info(questions[current_q]['explanation'])
+        if current_q in questions:
+            st.subheader(questions[current_q]['question'])
+            st.info(questions[current_q]['explanation'])
 
-        if st.session_state.current_question in ['q8', 'q9']:
-            col1, col2 = st.columns(2)
-            with col1:
-                ph = st.number_input("pH:", min_value=0.0, max_value=14.0, step=0.1)
-            with col2:
-                aw = st.number_input("Aw:", min_value=0.0, max_value=1.0, step=0.01)
-            if st.button("Vérifier"):
-                factor = check_growth_factors(ph, aw)
-                st.session_state.history.append((st.session_state.current_question, f"pH: {ph}, Aw: {aw}, Résultat: {factor}"))
-                st.write(get_growth_factor_explanation(factor))
-                handle_answer(factor)
+            if st.session_state.current_question in ['q8', 'q9']:
+                col1, col2 = st.columns(2)
+                with col1:
+                    ph = st.number_input("pH:", min_value=0.0, max_value=14.0, step=0.1)
+                with col2:
+                    aw = st.number_input("Aw:", min_value=0.0, max_value=1.0, step=0.01)
+                if st.button("Vérifier"):
+                    factor = check_growth_factors(ph, aw)
+                    st.session_state.history.append((st.session_state.current_question, f"pH: {ph}, Aw: {aw}, Résultat: {factor}"))
+                    st.write(get_growth_factor_explanation(factor))
+                    handle_answer(factor)
+            else:
+                col1, col2 = st.columns(2)
+                with col1:
+                    if st.button("Oui"):
+                        handle_answer('Oui')
+                with col2:
+                    if st.button("Non"):
+                        handle_answer('Non')
+
+            # Barre de progression
+            progress = (list(questions.keys()).index(st.session_state.current_question) + 1) / len(questions)
+            st.progress(progress)
         else:
-            col1, col2 = st.columns(2)
-            with col1:
-                if st.button("Oui"):
-                    handle_answer('Oui')
-            with col2:
-                if st.button("Non"):
-                    handle_answer('Non')
-
-        # Barre de progression
-        progress = (list(questions.keys()).index(st.session_state.current_question) + 1) / len(questions)
-        st.progress(progress)
-
+            st.error("Question non trouvée dans le dictionnaire.")
     else:
         st.success(f"Résultat final : {st.session_state.result}")
         if st.session_state.result == 'DLC':
