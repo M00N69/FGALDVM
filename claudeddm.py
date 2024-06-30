@@ -162,9 +162,15 @@ def handle_answer(answer):
     elif st.session_state.current_question == 'q7':
         st.session_state.current_question = 'q8' if answer == 'Oui' else 'DLC'
     elif st.session_state.current_question == 'q8':
-        st.session_state.current_question = 'q9' if answer == 'Oui' else 'DLC'
+        if answer == 'F':
+            st.session_state.result = 'DLC'
+        else:
+            st.session_state.current_question = 'q9'
     elif st.session_state.current_question == 'q9':
-        st.session_state.current_question = 'q10' if answer == 'Oui' else 'finalQuestion'
+        if answer in ['F', 'T']:
+            st.session_state.current_question = 'q10'
+        else:
+            st.session_state.current_question = 'finalQuestion'
     elif st.session_state.current_question == 'q10':
         st.session_state.result = 'DDM' if answer == 'Oui' else 'DLC'
     elif st.session_state.current_question == 'finalQuestion':
@@ -189,9 +195,9 @@ def main():
         reset_session_state()
 
     if st.session_state.result is None:
-        current_q = questions[st.session_state.current_question]
-        st.subheader(current_q['question'])
-        st.info(current_q['explanation'])
+        current_q = st.session_state.current_question
+        st.subheader(questions[current_q]['question'])
+        st.info(questions[current_q]['explanation'])
 
         if st.session_state.current_question in ['q8', 'q9']:
             col1, col2 = st.columns(2)
@@ -233,5 +239,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
