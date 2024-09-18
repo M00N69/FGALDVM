@@ -182,20 +182,30 @@ def handle_answer(answer):
     elif st.session_state.current_question == 'finalQuestion':
         st.session_state.result = 'DDM' if answer == 'Oui' else 'DLC'
 
-    st.experimental_rerun()
-
 def main():
-    # Ajouter la bannière Visipilot depuis l'URL
-    image_url = "https://github.com/M00N69/Gemini-Knowledge/raw/66b27ed1f1e8272721529f7b15cbf0fe4b135d98/visipilot%20banner.PNG"
-    try:
-        response = requests.get(image_url)
-        image = Image.open(BytesIO(response.content))
-        st.image(image, use_column_width=True)
-    except Exception as e:
-        st.error(f"Erreur lors du chargement de l'image : {e}")
+    # Passer en mode large
+    st.set_page_config(layout="wide")
+
+    # --- Logo and Link in Sidebar ---
+    st.sidebar.markdown(
+        f"""
+        <div class="sidebar-logo-container">
+            <a href="https://www.visipilot.com" target="_blank">
+                <img src="https://raw.githubusercontent.com/M00N69/RAPPELCONSO/main/logo%2004%20copie.jpg" alt="Visipilot Logo" class="sidebar-logo">
+            </a>
+        </div>
+        """, unsafe_allow_html=True
+    )
+
+    # Explication de l'application dans un expander
+    with st.sidebar.expander("À propos de l'application", expanded=True):
+        st.write("""
+            Cet outil vous guide à travers l'arbre de décision EFSA pour déterminer si votre produit alimentaire nécessite une 
+            Date Limite de Consommation (DLC) ou une Date de Durabilité Minimale (DDM). Répondez aux questions et obtenez un rapport
+            basé sur vos réponses.
+        """)
 
     st.title("Arbre de décision EFSA : DLC ou DDM")
-    st.write("Cet outil vous guide à travers l'arbre de décision EFSA pour déterminer si votre produit alimentaire nécessite une Date Limite de Consommation (DLC) ou une Date de Durabilité Minimale (DDM).")
 
     if 'current_question' not in st.session_state:
         reset_session_state()
@@ -240,7 +250,6 @@ def main():
         
         if st.button("Recommencer"):
             reset_session_state()
-            st.experimental_rerun()
 
         # Ajout du lien de téléchargement du PDF
         st.markdown(generate_download_link(st.session_state.history, st.session_state.result), unsafe_allow_html=True)
