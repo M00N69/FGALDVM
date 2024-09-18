@@ -134,8 +134,8 @@ def reset_session_state():
     st.session_state.current_question = 'q1'
     st.session_state.history = []
     st.session_state.result = None
-    st.session_state.ph = ""
-    st.session_state.aw = ""
+    st.session_state.ph = 0
+    st.session_state.aw = 0.1
     st.session_state.growth_factor = None
 
 def handle_answer(answer):
@@ -186,6 +186,29 @@ def main():
     # Passer en mode large
     st.set_page_config(layout="wide")
 
+    # --- Custom CSS ---
+    st.markdown(
+        """
+        <style>
+        [data-testid="stSidebar"] {
+            background-color: #2398B2;  
+        }
+        .banner {
+            background-image: url('https://github.com/M00N69/BUSCAR/blob/main/logo%2002%20copie.jpg?raw=true');
+            background-size: cover;
+            padding: 75px;
+            text-align: center;
+        }
+        .dataframe td {
+            white-space: normal !important;
+            word-wrap: break-word !important;
+        }
+        </style>
+        <div class="banner"></div>
+        """,
+        unsafe_allow_html=True
+    )
+
     # --- Logo and Link in Sidebar ---
     st.sidebar.markdown(
         f"""
@@ -219,9 +242,9 @@ def main():
             if st.session_state.current_question in ['q8', 'q9']:
                 col1, col2 = st.columns(2)
                 with col1:
-                    ph = st.number_input("pH:", min_value=0.0, max_value=14.0, step=0.1, key='ph')
+                    ph = st.slider("pH:", min_value=0.0, max_value=12.0, step=0.1, key='ph')
                 with col2:
-                    aw = st.number_input("Aw:", min_value=0.0, max_value=1.0, step=0.01, key='aw')
+                    aw = st.slider("Aw:", min_value=0.1, max_value=1.0, step=0.01, key='aw')
                 if st.button("Vérifier"):
                     factor = check_growth_factors(ph, aw)
                     st.session_state.history.append((st.session_state.current_question, f"pH: {ph}, Aw: {aw}, Résultat: {factor}"))
@@ -256,6 +279,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
