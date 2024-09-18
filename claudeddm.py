@@ -62,9 +62,7 @@ questions = {
 }
 
 def check_growth_factors(ph, aw):
-    ph = float(ph)
-    aw = float(aw)
-    
+    # Les sliders renvoient des valeurs déjà numériques, pas besoin de conversion supplémentaire
     if ph <= 3.9 or aw <= 0.88:
         return 'NF'
     if (3.9 < ph <= 4.2) and (0.88 < aw <= 0.92):
@@ -135,8 +133,7 @@ def reset_session_state():
     st.session_state.history = []
     st.session_state.result = None
     st.session_state.ph = 0
-    st.session_state.aw = 0.1
-    st.session_state.growth_factor = None
+    st.session_state.aw = 0.7  # Valeur initiale ajustée pour Aw
 
 def handle_answer(answer):
     st.session_state.history.append((st.session_state.current_question, answer))
@@ -242,9 +239,9 @@ def main():
             if st.session_state.current_question in ['q8', 'q9']:
                 col1, col2 = st.columns(2)
                 with col1:
-                    ph = st.slider("pH:", min_value=0.0, max_value=12.0, step=0.1, key='ph')
+                    ph = st.slider("pH:", min_value=0.0, max_value=12.0, step=0.1, key='ph')  # Valeur unique
                 with col2:
-                    aw = st.slider("Aw:", min_value=0.1, max_value=1.0, step=0.01, key='aw')
+                    aw = st.slider("Aw:", min_value=0.7, max_value=1.0, step=0.01, key='aw')  # Slider entre 0.7 et 1
                 if st.button("Vérifier"):
                     factor = check_growth_factors(ph, aw)
                     st.session_state.history.append((st.session_state.current_question, f"pH: {ph}, Aw: {aw}, Résultat: {factor}"))
@@ -279,6 +276,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
